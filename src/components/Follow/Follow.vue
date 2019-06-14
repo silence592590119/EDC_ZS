@@ -88,7 +88,6 @@ export default {
     //组件创建时，调用数据
     let that = this;
     that.followdata = mUtils.getStore("followData");
-    console.log(that.followdata);
     that.FollowNumName = that.followdata.FollowNumName;
     that.FormName = that.followdata.FormName;
     that.topTitle = that.followdata.FollowTimes == 0?"基线表单":"随访表单";
@@ -414,7 +413,7 @@ export default {
         $.each(condition,function(pIndex,pItem){
           $(".getTd").each(function(index,item){
             var $item = $(item),elementId=$item.attr("elementid"),segmentID = $item.attr("segmentid"),type=$item.attr("uiType");
-            if(elementId == pItem.ElementId && segmentID == pItem.checkItemId){
+            if(elementId == pItem.ElementId && segmentID == pItem.CheckItemId){
               if(/4|5/.test(type)){
                 var $node = $item.children(),val="";
                 if(/4/.test(type)){
@@ -446,7 +445,7 @@ export default {
               var $item = $(item),type=$item.attr("uiType"),elementID = $item.attr("elementid"),segmentID = $item.attr("segmentid");
               if(elementID == pItem.ElementId && segmentID == pItem.CheckItemId){
                   $item.parent().show();
-                  $item.find('input,select').attr("disabled","disabled");
+                  $item.find('input,select').removeAttr("disabled");
                   let required="";
                   if(/4|5/.test(type)){
                     required = $($item.children().children()).attr("rulerequired");
@@ -472,7 +471,7 @@ export default {
               if(elementID == pItem.ElementId && segmentID == pItem.CheckItemId){
                 if(pItem.OperatorResult == 101){
                   $item.parent().hide();
-                  if(/4|5/.test(type)) $item.find("input"),attr("checked",false)
+                  if(/4|5/.test(type)) $item.find("input").filter((i,o)=>o.checked).attr("checked",false);
                   else $item.find("input").val("");
                 }else if(pItem.OperatorResult == 102){
                   $item.find('input,select').attr("disabled","disabled");
@@ -813,7 +812,7 @@ export default {
     background-color: #6fa6e8;
   }
   .followContent {
-    height: calc(100% - 155px);
+    height: calc(100% - 160px);
     display: inline-block;
     overflow-x: hidden;
     overflow-y: auto;

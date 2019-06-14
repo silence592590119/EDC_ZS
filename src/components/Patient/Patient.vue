@@ -9,6 +9,8 @@
             class="dateSearch"
               v-model="dateRange"
               type="daterange"
+              :unlink-panels='true'
+              :editable="false"
               range-separator="至"
               format="yyyy-MM-dd"
               value-format="yyyy-MM-dd"
@@ -288,11 +290,20 @@ export default {
 </script>
 <style lang="less">
  .search{
-  .el-range-separator{
-    padding: 0px;
-    width: 50px;
-  }  
-}
+    .dateSearch{
+      .el-range-separator{
+        //padding: 0px;
+        width: 30px;
+      }  
+      // .el-range-input{
+      //   width: 78px;
+      // }
+    }
+  }
+  .el-picker-panel__icon-btn{
+    font-size: 18px;
+    padding-right: 18px;
+  }
 </style>
 <style lang="less" scoped>
     .search{
