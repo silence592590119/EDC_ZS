@@ -1,0 +1,250 @@
+body, div, span, header, footer, nav, section, aside, article, ul, dl, dt, dd, li, a, p, h1, h2, h3, h4,h5, h6, i, b, textarea, button, input, select, figure, figcaption {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-style: normal;
+    text-decoration: none;
+    border: none;
+    font-family: "Microsoft Yahei",sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-font-smoothing: antialiased;
+    &:focus {
+        outline: none;
+    }
+}
+
+
+
+input[type="button"], input[type="submit"], input[type="search"], input[type="reset"] {
+    -webkit-appearance: none;
+}
+
+textarea { -webkit-appearance: none;}   
+
+html,body{
+    height: 100%;
+    width: 100%;
+}
+
+
+.clear:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.clear{
+    zoom:1;
+}
+
+.back_img{
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.margin{
+    margin: 0 auto;
+}
+
+.left{
+    float: left;
+}
+
+.right{
+    float: right;
+}
+
+.hide{
+    display: none;
+}
+
+.show{
+    display: block;
+}
+.text_center{
+    text-align: center;
+}
+.text_left{
+    text-align: left;
+}
+.text_right{
+    text-align: right;
+}
+.ver_align{
+   vertical-align: middle;
+}
+
+
+
+
+//页面的公共样式
+.ellipsis{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.el-table .odd-row {
+   background:#eaefea;
+}
+.el-table .even-row {
+   background: #d9e6f1;
+}
+
+.fillcontain{
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+   // margin: 0 10px;
+}
+.fillcontainer{
+    width:100%;
+    height:100%;
+    overflow: auto;
+    position: absolute;
+    text-align:center;
+}
+.echartsPosition{
+    position: relative;
+    width: 90%;
+    height: 89%;
+    margin: 10px auto 50px;
+    box-shadow: 0 0 10px #A6E3E9;
+    border-radius: 10px;
+}
+//头部公共CSS
+.logo-container {
+    line-height: 56px;
+    min-width: 400px;
+   .logo {
+       height: 56px;
+       width: 50px;
+       margin-right: 5px;
+       vertical-align: middle;
+       display: inline-block;
+   }
+   .title{
+       vertical-align: middle;
+       font-size: 20px;
+      // font-family: cursive;
+       letter-spacing: 3px;
+   }
+  
+}
+.fa-user {
+   position: relative;
+   top: -2px;
+   margin-right: 4px;
+}
+.head-back .title{
+    letter-spacing: 0px;
+}
+   
+.head-nav {
+   width: 100%;
+   height: 60px;
+   min-width:600px;
+   background: url('../../img/zhi001.png');
+   position: relative;
+   top: 0px;
+   left: 0px;
+   z-index: 100;
+   color: #FFF;
+   .logout {
+       vertical-align: middle;
+       cursor: pointer;
+       font-size:x-large;
+   }
+}
+.logo-container{
+   min-width: 0;
+   .el-icon-back{
+        font-size: x-large;
+        font-weight: 600;
+        position: relative;
+        top: 3px;
+    }
+}
+.head-title{
+   text-align: center;
+}
+.head-user{
+   text-align: right
+}
+.userinfo {
+   line-height: 60px;
+   text-align:right;
+   float:right;
+}
+.avatar{
+   width: 40px;
+   height: 40px;
+   border-radius: 50%;
+   vertical-align: middle;
+   display: inline-block;
+}
+.welcome{
+   display: inline-block;
+   width:auto;
+   vertical-align: middle;
+   padding: 0 5px;
+   .name{
+       line-height: 20px;
+       text-align: center;
+       font-size: 14px;
+       margin: 0;
+   }
+   .comename{
+       font-size: 12px;
+   }
+   .avatarname{
+       font-weight: bolder;
+       padding-right: 20px;
+       font-size: 16px;
+   }
+}
+.username {
+   cursor: pointer;
+   margin-right: 5px;
+   .el-dropdown {
+       color: #FFF;
+   }
+}
+.border{
+   border:1px solid;
+}
+//content 区域显示
+.detail_box{
+    display: block;
+    width:100%;
+    height:90%;
+    overflow: hidden;
+    background-color: #ffffff;
+    margin:10px 0px;
+}
+.table_container{
+    width: 100%;
+    height: 90%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: inline-block;
+    padding-top:0px; 
+}
+.dataTips{
+    color: #333333;
+    margin-left: 0px;
+    margin-bottom: 0px;
+    span{  
+        width: 20px;
+        margin-left: 6px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+        top:1px;
+    }
+    .form-control-feedback{
+        position: relative;
+        color: red;
+    }
+}
+
+
