@@ -182,8 +182,11 @@ export default {
                       obj_f.UIType = attrType;
                       if (!mUtils.isEmpty(attrDic)) obj_f.ParentDictCode = attrDic; obj_f.Value = $item.find("option:selected").text();
                       if (item.UIType == '4') {
-                          obj_f.Content = $item.find("input[type=radio]").filter((i, o) => o.checked).attr("data-code");
-                          obj_f.Value = $item.find("input[type=radio]").filter((i, o) => o.checked).attr("data-name");
+                          let parent = $item.parent().parent(); 
+                          if($(parent).css('display') != 'none'){
+                            obj_f.Content = $item.find("input[type=radio]").filter((i, o) => o.checked).attr("data-code");
+                            obj_f.Value = $item.find("input[type=radio]").filter((i, o) => o.checked).attr("data-name"); 
+                          }
                       } else if (item.UIType == '5') {
                           obj_f.Content = ''; obj_f.Value = '';
                           $item.find("input[type=checkbox]").each(function (i, o) {
@@ -199,7 +202,10 @@ export default {
                               obj_f.Value = obj_f.Value.substring(0, obj_f.Value.length - 1);
                           }
                       } else {
-                          obj_f.Content = mUtils.getFormVal($item)[itemType]();
+                          let parent = $item.parent();
+                          if($(parent).css('display') != 'none'){
+                            obj_f.Content = mUtils.getFormVal($item)[itemType]();
+                          }
                       }
                       arrData.push(obj_f);
                       if (item.UIType != '4' && item.UIType != '5') {
@@ -265,7 +271,6 @@ export default {
             JSON.stringify(res.Data.ItemList)
           );
           $.each(list, (pIndex, pItem) => {
-            //console.log(pItem.Children);
             $.each(pItem.Children, (index, item) => {
               var type = item.UIType;
               if (/3|4|5/.test(type)) {
@@ -319,10 +324,41 @@ export default {
                           $item.find("input[data-code='" + o + "']").prop("checked", "checked");
                       });
                   }
-                  else mUtils.setFormVal($item, obj_f["Content"])[itemType]();
+                  else{
+                    if(/3/.test(item.UIType)){
+                      if(!mUtils.isEmpty(obj_f.Content)) mUtils.setFormVal($item, obj_f["Content"])[itemType]();
+                    }else mUtils.setFormVal($item, obj_f["Content"])[itemType]();
+                  } 
               }
           });
       });
+      if(that.status == 2){
+        $(".followList .getVal").attr("disabled",'disabled');
+        $(".followList .getVal").find("input,select").attr("disabled",'disabled')
+        $(".btn_list").hide();
+      }else{
+        $(".followList .getVal").removeAttr("disabled");
+        $(".followList .getVal").find("input,select").removeAttr("disabled");
+        $(".btn_list").show();
+      }
+      that.loadLogicalCheck(_EleData);
+      this.$nextTick().then(() => {
+        //多选框、单选框逻辑校验
+        $('div.getVal').find("input").on('click',function(e){
+          let $parent= $(this).parent().parent().parent(),logControl = [],logControlDetails=[];
+          logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
+          that.logicalCommon(logControlDetails)
+        });
+        //下拉框逻辑校验
+        $("select.getVal").change(function(){
+          let $parent= $(this).parent(),logControl = [],logControlDetails=[];
+          logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
+          that.logicalCommon(logControlDetails);
+        })
+      })
+    },
+    //加载逻辑校验
+    loadLogicalCheck(_EleData){
       $(".getTd").each(function(index,item){
         var $item =$(item),logControl =$item.attr("logControl"),details =$item.attr('logControlDetails'), state=false;
         let condition=[],result=[];
@@ -358,7 +394,7 @@ export default {
                    if(pItem.OperatorResult == 101){
                      $item.parent().hide();
                    }else if(pItem.OperatorResult == 102){
-                      $item.find('input,select').attr("disabled","disabled");
+                     $item.find('input,select').attr("disabled","disabled");
                    }else if(pItem.OperatorResult == 103){
                      let required="";
                      if(/4|5/.test(type)){
@@ -381,22 +417,6 @@ export default {
           }
         }
       });
-      if(that.status == 2){
-        $(".followList .getVal").attr("disabled",'disabled');
-        $(".followList .getVal").find("input,select").attr("disabled",'disabled')
-        $(".btn_list").hide();
-      }else{
-        $(".followList .getVal").removeAttr("disabled");
-        $(".followList .getVal").find("input,select").removeAttr("disabled");
-        $(".btn_list").show();
-      }
-      this.$nextTick().then(() => {
-        $('div.getVal').find("input").on('click',function(e){
-          let $parent= $(this).parent().parent().parent(),logControl = [],logControlDetails=[];
-          logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
-          that.logicalCommon(logControlDetails)
-        })
-      })
     },
     //逻辑校验公共逻辑
     logicalCommon(objData){

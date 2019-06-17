@@ -26,7 +26,14 @@ axios.interceptors.response.use(function (response) {
   // 对响应数据做点什么，允许在数据返回客户端前，修改响应的数据
   // 如果只需要返回体中数据，则如下，如果需要全部，则 return response 即可
   //console.log(response)
-  return response.data
+
+  if(response.data.ServerCode == '403' || response.data.ServerCode == '450'){
+    showMessage('error',response.data.ServerMsg);
+    return Promise.reject(response.data.ServerMsg);    
+  }else{
+    return response.data
+  }
+   
 }, function (error) {
   // 对响应错误做点什么
   return Promise.reject(error)
@@ -40,11 +47,11 @@ function errorState (response) {
   //console.log(response);
   if(response && response.status === 200){
     return response
-  }else{
-    //alert('数据获取错误') 
-    showMessage('error',"服务器连接超时，请重新登陆！");
-    return false;
   }
+  // //else{
+  //   showMessage('error',"服务器连接超时，请重新登陆！");
+  //   return;
+  // }
 }
 // 封装数据返回成功提示函数
 function successState (res) {
@@ -54,19 +61,16 @@ function successState (res) {
     if (res.ServerCode == '200') {
         return res
     }else{
-      if(res.ServerCode == '403'){
+      if(res.ServerCode == '403' || res.ServerCode == '450'){
         showMessage('error',res.ServerMsg);
-        return false;
-      }else if(res.ServerCode == '450'){
-        showMessage('error',res.ServerMsg);
-        return false;
+        return;
       }else{
           MessageBox.alert(res.ServerMsg, '温馨提示', {
             confirmButtonText: '确定',
             type:'error',
           });
       }
-      return false;
+      return;
     }
 }
 function showMessage(type,message){
