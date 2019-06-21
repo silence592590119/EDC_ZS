@@ -374,13 +374,74 @@ export const requiredCheck = (requireArr) =>{
                 else ruleState = true;
                 ruleState ? errorMsgOperate(false, $item) : errorMsgOperate(true, $item, content);
                 state += ruleState + ",";
+            },
+            booleanDateCheck:function($item){
+                $.each($item, function (index, item) {
+                    var $item = $(item), $parent = $item.parent(), mindata = $item.attr("mindata"), maxdata = $item.attr("maxdata"),
+                        val = $item.val(), uitype = $parent.attr("uitype");
+                    if (/7|9/.test(uitype)) {
+                        var dapt = "",_mindata ="",_maxdata = "" ;
+                        _mindata = new Date(mindata).getTime(); _maxdata = new Date(maxdata).getTime(); val = new Date(val).getTime();
+                        if (!isEmpty(val)) {
+                            if (val < _mindata || val > _maxdata) {
+                                dapt = false;
+                                errorMsgOperate(true, $item, '日期的输入范围为[' + mindata + '，' + maxdata + ']');
+                                $item.removeClass("errorPrompt");
+                            } else {
+                                dapt = true;
+                                errorMsgOperate(false, $item);
+                            }
+                        } else {
+                            dapt = true;
+                            errorMsgOperate(false, $item);
+                        }
+                        state += dapt + ",";
+                    } else {
+                        var clock = "";
+                        var t1 = mindata.split(":"), t2 = maxdata.split(":"), t3 = val.split(":");
+                        if (!isEmpty(val)) {
+                            if (mindata && maxdata) {
+                                if (t3[0] >= t1[0] && t3[0] <= t2[0] && t3[1] >= t1[1] && t3[1] <= t2[1]) {
+                                    clock = true;
+                                    errorMsgOperate(false, $item);
+                                } else {
+                                    clock = false;
+                                    errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
+                                    $item.removeClass("errorPrompt");
+                                };
+                            } else if (mindata && !maxdata) {
+                                if (t3[0] >= t1[0] && t3[1] >= t1[1]) {
+                                    clock = true;
+                                    errorMsgOperate(false, $item);
+                                } else {
+                                    clock = false;
+                                    errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
+                                    $item.removeClass("errorPrompt");
+                                };
+                            } else if (!mindata && maxdata) {
+                                if (t3[0] <= t2[0] && t3[1] <= t2[1]) {
+                                    clock = true;
+                                    errorMsgOperate(false, $item);
+                                } else {
+                                    clock = false;
+                                    errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
+                                    $item.removeClass("errorPrompt");
+                                };
+                            }
+                        } else {
+                            clock = true;
+                            errorMsgOperate(false, $item);
+                        }
+                        state += clock + ",";
+                    }
+                });
             }
         }
         $.each(requireArr, function (index, item) {
             //rulerequired是否必填自定义属性存在必填 否则不必填
-            var $item = $(item), $parent = $item.parent(), required = $item.attr("rulerequired"), rule = $item.attr("ruleReg") || "", range = $item.attr("ruleRange") || "", digit = $item.attr("ruleDigit") || "", val = $item.val(), reqState = null, attrType = $parent.attr("uitype");
+            var $item = $(item), $parent = $item.parent(), required = $item.attr("rulerequired"),logcRequired=$item.attr("logcRequired"), rule = $item.attr("ruleReg") || "", range = $item.attr("ruleRange") || "", digit = $item.attr("ruleDigit") || "", val = $item.val(), reqState = null, attrType = $parent.attr("uitype");
             errorMsgOperate(false, $item);
-            if (required == '1') {
+            if (required == '1' || logcRequired == 1) {
                 reqState = ruleObj.required(val);//返回true填写false未填写
                 state += reqState + ",";
                 if (!reqState) {
@@ -391,65 +452,7 @@ export const requiredCheck = (requireArr) =>{
                         if (range) pubObj.booleanInt($item, range, digit);
                     }
                     if (!rule && !range && /7|8|9/.test(attrType)) {
-                        $.each($item, function (index, item) {
-                            var $item = $(item), $parent = $item.parent(), mindata = $item.attr("mindata"), maxdata = $item.attr("maxdata"),
-                                val = $item.val(), uitype = $parent.attr("uitype");
-                            if (/7|9/.test(uitype)) {
-                                var dapt = "",_mindata ="",_maxdata = "" ;
-                                _mindata = new Date(mindata).getTime(); _maxdata = new Date(maxdata).getTime(); val = new Date(val).getTime();
-                                if (!isEmpty(val)) {
-                                    if (val < _mindata || val > _maxdata) {
-                                        dapt = false;
-                                        errorMsgOperate(true, $item, '日期的输入范围为[' + mindata + '，' + maxdata + ']');
-                                        $item.removeClass("errorPrompt");
-                                    } else {
-                                        dapt = true;
-                                        errorMsgOperate(false, $item);
-                                    }
-                                } else {
-                                    dapt = true;
-                                    errorMsgOperate(false, $item);
-                                }
-                                state += dapt + ",";
-                            } else {
-                                var clock = "";
-                                var t1 = mindata.split(":"), t2 = maxdata.split(":"), t3 = val.split(":");
-                                if (!isEmpty(val)) {
-                                    if (mindata && maxdata) {
-                                        if (t3[0] >= t1[0] && t3[0] <= t2[0] && t3[1] >= t1[1] && t3[1] <= t2[1]) {
-                                            clock = true;
-                                            errorMsgOperate(false, $item);
-                                        } else {
-                                            clock = false;
-                                            errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
-                                            $item.removeClass("errorPrompt");
-                                        };
-                                    } else if (mindata && !maxdata) {
-                                        if (t3[0] >= t1[0] && t3[1] >= t1[1]) {
-                                            clock = true;
-                                            errorMsgOperate(false, $item);
-                                        } else {
-                                            clock = false;
-                                            errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
-                                            $item.removeClass("errorPrompt");
-                                        };
-                                    } else if (!mindata && maxdata) {
-                                        if (t3[0] <= t2[0] && t3[1] <= t2[1]) {
-                                            clock = true;
-                                            errorMsgOperate(false, $item);
-                                        } else {
-                                            clock = false;
-                                            errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
-                                            $item.removeClass("errorPrompt");
-                                        };
-                                    }
-                                } else {
-                                    clock = true;
-                                    errorMsgOperate(false, $item);
-                                }
-                                state += clock + ",";
-                            }
-                        });
+                        pubObj.booleanDateCheck($item);
                     }
                     if (!rule && !range && digit) {
                         pubObj.booleanDigit($item, digit);
@@ -466,65 +469,7 @@ export const requiredCheck = (requireArr) =>{
                 }
                 if (!rule && !range && /7|8|9/.test(attrType)) {
                     //onlyDateCheck($item);
-                    $.each($item, function (index, item) {
-                        var $item = $(item), $parent = $item.parent(), mindata = $item.attr("mindata"), maxdata = $item.attr("maxdata"),
-                            val = $item.val(), uitype = $parent.attr("uitype");
-                        if (/7|9/.test(uitype)) {
-                            var dapt = "",_mindata ="",_maxdata = "" ;
-                            _mindata = new Date(mindata).getTime(); _maxdata = new Date(maxdata).getTime(); val = new Date(val).getTime();
-                            if (!isEmpty(val)) {
-                                if (val < _mindata || val > _maxdata) {
-                                    dapt = false;
-                                    errorMsgOperate(true, $item, '日期的输入范围为[' + mindata + '，' + maxdata + ']');
-                                    $item.removeClass("errorPrompt");
-                                } else {
-                                    dapt = true;
-                                    errorMsgOperate(false, $item);
-                                }
-                            } else {
-                                dapt = true;
-                                errorMsgOperate(false, $item);
-                            }
-                            state += dapt + ",";
-                        } else {
-                            var clock = "";
-                            var t1 = mindata.split(":"), t2 = maxdata.split(":"), t3 = val.split(":");
-                            if (!isEmpty(val)) {
-                                if (mindata && maxdata) {
-                                    if (t3[0] >= t1[0] && t3[0] <= t2[0] && t3[1] >= t1[1] && t3[1] <= t2[1]) {
-                                        clock = true;
-                                        errorMsgOperate(false, $item);
-                                    } else {
-                                        clock = false;
-                                        errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
-                                        $item.removeClass("errorPrompt");
-                                    };
-                                } else if (mindata && !maxdata) {
-                                    if (t3[0] >= t1[0] && t3[1] >= t1[1]) {
-                                        clock = true;
-                                        errorMsgOperate(false, $item);
-                                    } else {
-                                        clock = false;
-                                        errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
-                                        $item.removeClass("errorPrompt");
-                                    };
-                                } else if (!mindata && maxdata) {
-                                    if (t3[0] <= t2[0] && t3[1] <= t2[1]) {
-                                        clock = true;
-                                        errorMsgOperate(false, $item);
-                                    } else {
-                                        clock = false;
-                                        errorMsgOperate(true, $item, '时间的输入范围为[' + mindata + '，' + maxdata + ']');
-                                        $item.removeClass("errorPrompt");
-                                    };
-                                }
-                            } else {
-                                clock = true;
-                                errorMsgOperate(false, $item);
-                            }
-                            state += clock + ",";
-                        }
-                    });
+                    pubObj.booleanDateCheck($item);
                 }
                 if (!rule && !range && digit) {
                     pubObj.booleanDigit($item, digit);

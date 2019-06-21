@@ -468,17 +468,17 @@ export default {
                   $item.find('input,select').removeAttr("disabled");
                   let required="";
                   if(/4|5/.test(type)){
-                    required = $($item.children().children()).attr("rulerequired");
-                    $($item.children().children()).removeAttr("logcRequired",'1');
+                    required = $($item.find('div')).attr('rulerequired');
+                    $($item.find('div')).removeAttr("logcRequired");
                   }else{
                     required = $($item.children()).attr("rulerequired");
                     $($item.children()).removeAttr("logcRequired",'1');
                   }
                   if(required != 1){
-                    let preHtml = $($($($item.prev()))).html();
-                    if(preHtml.indexOf("i") > -1){
-                      $($($($item.prev()))).html(preHtml.replace("<i>*</i>",''));
-                    }else $($($($item.prev()))).html(preHtml)
+                    let preHtml = $($($item.prev())).html();
+                    if(preHtml.indexOf("*") > -1){
+                     $($($item.prev())).html(preHtml.replace("<i>*</i>",''));
+                    }else $($($item.prev())).html(preHtml)
                   }
               }
           })
@@ -507,8 +507,8 @@ export default {
                   }
                   if(required != 1){
                     let preHtml = $($($item.prev())).html();
-                    if(preHtml.indexOf("i") == -1){
-                      $($($item.prev())).html("<i>*</i>"+preHtml);
+                    if(preHtml.indexOf("*") == -1){
+                      $($($item.prev())).html("<i>*</i>"+preHtml)
                     }
                   }
                 }
