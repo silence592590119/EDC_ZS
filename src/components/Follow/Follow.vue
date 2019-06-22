@@ -375,11 +375,23 @@ export default {
             $.each(condition,function(pIndex,pItem){
               $.each(_EleData,function(index,item){
                 if(item.ElementId == pItem.ElementId && item.CheckItemId == pItem.CheckItemId){
-                  if(!mUtils.isEmpty(item.FollowData.Content)){
-                    if(pItem.OperatorValue == item.FollowData.Content) state = true;
+                  let data = item.FollowData.Content;
+                  if(!mUtils.isEmpty(data)){
+                    if(pItem.UIType == 5){
+                       let arr = data.split(',');
+                       if(mUtils.contains(arr,pItem.OperatorValue)){
+                          state = true;
+                       }
+                    }else {if(pItem.OperatorValue == data) state = true;}
                   }else {
-                    if(item.DefaultValue){
-                      if(pItem.OperatorValue == item.DefaultValue) state = true;
+                    let defValue = item.DefaultValue;
+                    if(defValue){
+                       if(pItem.UIType == 5){
+                        let arr = defValue.split(',');
+                        if(mUtils.contains(arr,pItem.OperatorValue)){
+                            state = true;
+                        }
+                       }else {if(pItem.OperatorValue == defValue) state = true;}
                     }
                   }
                 }
