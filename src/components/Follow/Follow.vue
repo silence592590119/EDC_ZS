@@ -171,7 +171,8 @@ export default {
       let arrData = [], requireArr = [], radioArr = [], dateArr = [], content = "";
       $(".getVal").each(function(index,item) {
           var $item = $(item), $itemParent = $item.parent(), attrId = $itemParent.attr("elementid"), segmentId = $itemParent.attr("segmentid"),
-              attrType = $itemParent.attr("uitype"), attrDic = $itemParent.attr("dictformname"), attrReq = $item.attr("rulerequired"), itemType;
+              attrType = $itemParent.attr("uitype"), attrDic = $itemParent.attr("dictformname"), attrReq = $item.attr("rulerequired"), itemType,
+              attrLogic = $item.attr("logcRequired");
           itemType = item.type == undefined ? $(item).attr('type') : item.type;
           $.each(CheckElementData, function (pIndex, pItem) {
               $.each(pItem.Children, function (index, item) {
@@ -202,26 +203,26 @@ export default {
                               obj_f.Value = obj_f.Value.substring(0, obj_f.Value.length - 1);
                           }
                       } else {
-                          let parent = $item.parent();
+                          let parent = $item.parent().parent();
                           if($(parent).css('display') != 'none'){
                             obj_f.Content = mUtils.getFormVal($item)[itemType]();
                           }
                       }
                       arrData.push(obj_f);
                       if (item.UIType != '4' && item.UIType != '5') {
-                          requireArr.push($item);
+                          if($item.parent().parent().css('display') != 'none') requireArr.push($item);
                           if (/7|8|9/.test(item.UIType)) {
-                              dateArr.push($item);
+                            if($item.parent().parent().css('display') != 'none') dateArr.push($item);
                           }
                       } else {
-                          if (attrReq == '1') radioArr.push($item);
+                          if (attrReq == '1' || attrLogic == 1){
+                            if($item.parent().parent().css('display') != 'none') radioArr.push($item);  
+                          } 
                       }
                   }
               });
           });
       });
-      mUtils.requiredCheck(requireArr);
-      mUtils.onlyRadioCheckBox(radioArr);//必填项校验
       Param.isSubmit = isType == true ? '2' : '1';
       Param.followDetList = arrData;
       //调用服务接口
@@ -236,7 +237,9 @@ export default {
           return; 
         }
       }else{
-          that.saveFollowData(isType,Param,msg)
+        mUtils.requiredCheck(requireArr);
+        mUtils.onlyRadioCheckBox(radioArr);//必填项校验
+        that.saveFollowData(isType,Param,msg)
       }
     },
     //保存数据
@@ -410,8 +413,8 @@ export default {
                    }else if(pItem.OperatorResult == 103){
                      let required="";
                      if(/4|5/.test(type)){
-                        required = $($item.children().children()).attr("rulerequired");
-                        $($item.children().children()).attr("logcRequired",'1');
+                        required = $($item.find('div')).attr("rulerequired");
+                        $($item.find('div')).attr("logcRequired",'1');
                      }else{
                         required = $($item.children()).attr("rulerequired");
                         $($item.children()).attr("logcRequired",'1');
@@ -511,8 +514,8 @@ export default {
                 }else if(pItem.OperatorResult == 103){
                   let required="";
                   if(/4|5/.test(type)){
-                    required = $($item.children().children()).attr("rulerequired");
-                    $($item.children().children()).attr("logcRequired",'1');
+                    required = $($item.find('div')).attr("rulerequired");
+                    $($item.find('div')).attr("logcRequired",'1');
                   }else{
                     required = $($item.children()).attr("rulerequired");
                     $($item.children()).attr("logcRequired",'1');

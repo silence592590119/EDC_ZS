@@ -26,14 +26,12 @@ axios.interceptors.response.use(function (response) {
   // 对响应数据做点什么，允许在数据返回客户端前，修改响应的数据
   // 如果只需要返回体中数据，则如下，如果需要全部，则 return response 即可
   //console.log(response)
-
   if(response.data.ServerCode == '403' || response.data.ServerCode == '450'){
     showMessage('error',response.data.ServerMsg);
-    return Promise.reject(response.data.ServerMsg);    
+    return false;//Promise.reject(response.data.ServerMsg);    
   }else{
     return response.data
   }
-   
 }, function (error) {
   // 对响应错误做点什么
   return Promise.reject(error)
@@ -47,11 +45,10 @@ function errorState (response) {
   //console.log(response);
   if(response && response.status === 200){
     return response
+  }else{
+    showMessage('error',"服务器连接超时，请重新登陆！");
+    return;
   }
-  // //else{
-  //   showMessage('error',"服务器连接超时，请重新登陆！");
-  //   return;
-  // }
 }
 // 封装数据返回成功提示函数
 function successState (res) {
@@ -87,7 +84,6 @@ function showMessage(type,message){
       }
    });
 }
-
 // 封装axios
 function apiAxios (method, url, params) {
   let httpDefault = {
@@ -98,7 +94,7 @@ function apiAxios (method, url, params) {
     // `data` 是作为请求主体被发送的数据
     params: method === 'GET' || method === 'DELETE' ? params : null,
     data: method === 'POST' || method === 'PUT' ? params : null,
-    timeout: 5000,
+    timeout: 6000,
   }
   if(!mUtils.isEmpty(mUtils.getStore("token"))){
     httpDefault.headers = {
