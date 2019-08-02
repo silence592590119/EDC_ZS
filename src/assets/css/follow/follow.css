@@ -1,0 +1,274 @@
+.title {
+    margin: 0 20px;
+    font-size: 20px;
+    padding: 10px 0px;
+    color: #333333;
+    font-weight: bold;
+    padding-top: 0px;
+  }
+  .table_container {
+    height: calc(100%);
+    overflow: hidden;
+  }
+  .basicInfo {
+    font-size: 17px;
+    margin: 0px 20px;
+    line-height: 50px;
+    height: 50px;
+    background: #cef0ed;
+    padding: 0 16px;
+    border-radius: 4px;
+  }
+  .basicInfo .segmentSatus .span{
+    float: right;
+    padding-left: 16px;
+  }
+  .basicInfo .segmentSatus .span span{
+    color: red;
+  }
+  .tips {
+    margin: 10px 20px;
+    overflow: hidden;
+  }
+  .divider{
+    height: 1px;
+    border-bottom: 1px solid #cce8e8;
+    margin: 0 20px;
+    margin-bottom: 10px;
+  }
+  .spanlist{
+    width: 100%;
+    overflow-y: hidden;
+    white-space: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling:touch
+  }
+  .seach-all {
+    border-right: 1px solid #ffffff;
+    display: inline-block;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #0fa9ab;
+  }
+  .seach-all:last-child {
+    border-right: none;
+  }
+  .seachchange {
+    background-color: #6fa6e8;
+  }
+  .detail_box{
+    height:calc(100% - 120px);
+    margin-bottom: 0px;
+  }
+  .followContent {
+    height: calc(100% - 130px);
+    display: inline-block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 28px;
+  }
+  .followContent >>> .followList {
+    display: inline-block;
+  }
+  .followContent >>> div.titleList{
+    margin: 0 20px;
+  }
+  .followContent >>> div.questionList{
+    margin: 0 30px;
+  }
+  .btn_list{
+    width: 100%;
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+  }
+  .followContent >>> .followList .title_head {
+    width: 100%;
+    height: 36px;
+    line-height: 36px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: rgb(233, 251, 255);
+    padding-left: 10px;
+  }
+  .followContent >>> .followList .ElemRemark{
+    font-size: 12px;
+    color: #a4bfbf;
+  }
+  .followContent >>> .followList .title_detail input[type="checkbox"], 
+  .followContent >>> .followList .title_detail input[type="radio"] {
+    vertical-align: middle;
+    height: 18px;
+    width: 18px;
+    display: inline-block;
+    margin-top: -2px;
+  }
+  .followContent >>> .followList .title_detail label {
+    padding-left: 0px;
+    padding-right: 12px;
+    font-weight: normal;
+    /* display:block; */
+    /* margin-top: 5px; */
+  }
+  .followContent >>> .followList  i {
+    top: 2px;
+    position: relative;
+    font-size: 18px;
+    padding-left: 0;
+    /* padding-right: 2px; */
+    font-weight: bold;
+    color: red;
+    font-style: normal;
+  }
+  .followContent >>> .followList .title_detail input {
+    width: 172px;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #aaa;
+    display: inline-block;;
+  }
+  .followContent >>> .followList .title_detail select{
+    border: 1px solid #aaa;
+    width: 170px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 2px;
+    background-color: #fff;
+  }
+  .followContent >>> .followList textarea{
+    border: 1px solid #aaa;
+    /* width: 500px; */
+    width: 100%;
+    height: 100px;
+    border-radius: 2px;
+  }
+  .followContent >>> .followList .table_detail{
+    font-size: 18px;
+    table-layout: fixed;
+    width: 100%;
+  }
+  .followContent >>> .followList .title_detail .table_detail tr td{
+    width: 10%;
+    border: 1px solid #cce8e8;
+    background-color: #fafbfd;
+    height: 26px;
+    line-height: 26px;
+    padding-right: 16px;
+  }
+  .followContent >>> .followList .title_detail .table_detail tr .getTd{
+    text-align: left;
+    padding: 5px;
+    background-color: #fff;
+  }
+  .followContent >>> .followList .title_detail .table_detail tr td:first-child{
+    width: 4.8%;
+    text-align: right;
+  }
+  /* 问卷样式 */
+  .followContent >>> .followList .question_detail .ElemRemark{
+    font-size: 14px;
+    color: #a4bfbf;
+  }
+  .followContent >>> .followList .question_detail .questionName{
+    height: 46px;
+    line-height:46px;
+    padding: 6px 0px;
+  }
+  .followContent >>> .followList .question_detail .questionName .noRequred{
+    margin-left: 8px;
+  }
+  .followContent >>> .followList .question_detail label{  
+    font-weight: normal;
+    display:block;
+    margin-top: 5px;
+    border: 1px solid #cce8e8;
+    min-height: 50px;
+    line-height: 50px;
+    padding-left: 36px;
+  }
+  .followContent >>> .followList .question_detail input[type="checkbox"], 
+  .followContent >>> .followList .question_detail input[type="radio"] {
+    vertical-align: middle;
+    height: 18px;
+    width: 18px;
+    display: inline-block;
+    margin-top: -2px;
+    margin-right: 8px;
+  }
+  .followContent >>> .followList .question_detail input,
+  .followContent >>> .followList .question_detail select{
+    /* width: 190px; */
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    /* border: 1px solid #aaa; */
+    border: none;
+    background: #ffffff;
+    display: inline-block;;
+  }
+  .followContent >>> .followList .question_detail .table_detail tr td{
+    height: 36px;
+    line-height: 36px;
+  }
+  .followContent >>> .followList .question_detail .table_detail tr .getTd{
+    background-color: #fff;
+  }
+  .followContent >>> .followList .question_detail .text_input{
+      height: 50px;
+      line-height: 50px;
+      border: 1px solid #ddd;
+      padding-left: 36px;
+  }
+  .followContent >>> .followList .question_detail select{
+    border-radius: 2px;
+    background-color: #fff;
+  }
+  /*end*/
+  .btn_list .el-button{
+    padding: 12px 26px;
+    font-size: 16px;
+    margin-right: 20px;
+  }
+  .table {
+    display: table;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .table-column-group {
+    display: table-column-group;
+  }
+  .table-column {
+    display: table-column;
+    width: 100px;
+  }
+  .table-row-group {
+    display: table-row-group;
+  }
+  .table-row {
+    display: table-row;
+  }
+  .table-row-group .table-row:hover,
+  .table-footer-group .table-row:hover {
+    background: #f6f6f6;
+  }
+  .table-cell {
+    display: table-cell;
+    padding: 0 5px;
+    border: 1px solid #cce8e8;
+    line-height: 30px;
+    text-align: center;
+  }
+  .getLi {
+    width: 20%;
+    max-width: 20%;
+  }
+  .className {
+    text-align: right;
+    color: #333333;
+    background-color: #fafbfd;
+  }

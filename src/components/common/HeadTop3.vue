@@ -31,7 +31,8 @@
             return{
                 userinfo:'',
                 username:'',
-                titleName:'随访表单'
+                titleName:'随访表单',
+                segNum:''
             }
           },
           props:['msgFather'],
@@ -72,7 +73,24 @@
                   })
               },
               clickHandlerBack(){
-                  this.$router.push('/patient');
+                let _this = this,result=[];
+                _this.segNum =  mUtils.getStore('segNum');
+                result=_this.segNum.split("-");   
+                if(result[0] == 0 && result[1] == 0 && result[2] > 0){
+                    _this.$router.push('/patient');
+                    return false;
+                }else{
+                    _this.$confirm('还有'+(parseInt(result[0])+parseInt(result[1]))+'个段落没有提交，是否确认返回?', '温馨提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        _this.$router.push('/patient');
+                        mUtils.removeStore("segNum");
+                    }).catch(() => {
+                        console.log('取消');
+                    });
+                }; 
               }
           }
     }

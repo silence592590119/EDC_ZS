@@ -5,7 +5,11 @@ import router from '../router/index'
 import * as mUtils from '../utils/mUtils'
 
 import { Loading,MessageBox } from 'element-ui';
-
+//测试环境和正式环境服务地址配置
+let baseURL = Config.default.baseURL; //测试版
+//let baseURL = Config.default.productURL; //中山正式版
+//let baseURL = Config.default.xianURL; //西安四院正式版
+//let baseURL = Config.default.gongURL; // ..正式版 
 let loadingInstance;
 // 添加请求拦截器，在发送请求之前做些什么(**具体查看axios文档**)
 axios.interceptors.request.use(function (config) {
@@ -25,18 +29,13 @@ axios.interceptors.request.use(function (config) {
 axios.interceptors.response.use(function (response) {
   // 对响应数据做点什么，允许在数据返回客户端前，修改响应的数据
   // 如果只需要返回体中数据，则如下，如果需要全部，则 return response 即可
-  //console.log(response)
-  if(response.data.ServerCode == '403' || response.data.ServerCode == '450'){
-    showMessage('error',response.data.ServerMsg);
-    return false;//Promise.reject(response.data.ServerMsg);    
-  }else{
+  if(response && response.status === 200){
     return response.data
   }
 }, function (error) {
   // 对响应错误做点什么
   return Promise.reject(error)
 })
-
 // 封装数据返回失败提示函数
 function errorState (response) {
   // 隐藏loading
@@ -88,7 +87,7 @@ function showMessage(type,message){
 function apiAxios (method, url, params) {
   let httpDefault = {
     method: method,
-    baseURL: Config.default.baseURL,
+    baseURL: baseURL,
     url: url,
     // `params` 是即将与请求一起发送的 URL 参数
     // `data` 是作为请求主体被发送的数据
