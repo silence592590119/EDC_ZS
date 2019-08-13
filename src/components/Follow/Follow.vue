@@ -180,15 +180,21 @@ export default {
                           if($(parent).css('display') != 'none'){
                             obj_f.Content = $item.find("input[type=radio]").filter((i, o) => o.checked).attr("data-code") || "";
                             obj_f.Value = $item.find("input[type=radio]").filter((i, o) => o.checked).attr("data-name") || ""; 
+                          }else{
+                            obj_f.Content = '';
+                            obj_f.Value = '';
                           }
                       } else if (item.UIType == '5') {
-                         obj_f.Content = ''; obj_f.Value = '';
-                          $item.find("input[type=checkbox]").each(function (i, o) {
+                          obj_f.Content = ''; obj_f.Value = '';
+                          let parent =  $item.parent().parent();
+                          if($(parent).css('display') != 'none'){
+                            $item.find("input[type=checkbox]").each(function (i, o) {
                               if (o.checked) {
                                   obj_f.Content += $(this).data("code") + ',';
                                   obj_f.Value += $(this).data("name") + ',';
                               }
-                          });
+                            });
+                          }
                           if (!mUtils.isEmpty(obj_f.Content)) {
                               obj_f.Content = obj_f.Content.substring(0, obj_f.Content.length - 1);
                           }
@@ -200,6 +206,9 @@ export default {
                           parent = that.displayMode == 1 ? $item.parent().parent():$item.parent().parent().parent();
                           if($(parent).css('display') != 'none'){
                             obj_f.Content = mUtils.getFormVal($item)[itemType]();
+                          }else{
+                            obj_f.Content = '';
+                            obj_f.Value = '';
                           }
                       }
                       arrData.push(obj_f);
@@ -322,7 +331,8 @@ export default {
         });
         //下拉框逻辑校验
         $("select.getVal").change(function(){
-          let $parent= $(this).parent(),logControl = [],logControlDetails=[];
+          var $parent= $(this).parent(),logControl = [],logControlDetails=[];
+          if(that.displayMode == 2) $parent= $(this).parent().parent();
           logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
           setting.logicalCommon(logControlDetails,that.displayMode,'');
         })

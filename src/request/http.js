@@ -6,8 +6,8 @@ import * as mUtils from '../utils/mUtils'
 
 import { Loading,MessageBox } from 'element-ui';
 //测试环境和正式环境服务地址配置
-let baseURL = Config.default.baseURL; //测试版
-//let baseURL = Config.default.productURL; //中山正式版
+//let baseURL = Config.default.baseURL; //测试版
+let baseURL = Config.default.productURL; //中山正式版
 //let baseURL = Config.default.xianURL; //西安四院正式版
 //let baseURL = Config.default.gongURL; // ..正式版 
 let loadingInstance;
@@ -93,7 +93,7 @@ function apiAxios (method, url, params) {
     // `data` 是作为请求主体被发送的数据
     params: method === 'GET' || method === 'DELETE' ? params : null,
     data: method === 'POST' || method === 'PUT' ? params : null,
-    timeout: 6000,
+    timeout: 10000,
   }
   if(!mUtils.isEmpty(mUtils.getStore("token"))){
     httpDefault.headers = {

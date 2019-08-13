@@ -1,9 +1,10 @@
 <template>
-    <div class="login_page fillcontain" :style="{ height: bodyHeight + 'px' }">
+    <div class="login_page fillcontain" :style="{ height: bodyHeight + 'px'}">
         <transition name="form-fade" mode="in-out">
           <div class="form_contianer"> 
             <div class="logo-image">
               <img src="../../assets/img/logo.png" />
+              <!-- <img src="../../assets/img/logo_xian.png" /> -->
             </div>
             <section class="form_contianer">
               <div class="manage_tip">
@@ -109,6 +110,7 @@ export default {
 </script>
 <style lang="less" scoped>
   @import '../../assets/css/common/mixin';
+  //中山样式
   .logo-image{
     position: relative;
     top: -132px;
@@ -117,8 +119,18 @@ export default {
       width: 120%;
     }
   }
+  //西安四院样式
+  //  .logo-image{
+  //   position: relative;
+  //   top: -130px;
+  //   left: 0;
+  //   img{
+  //     width: 90%;
+  //   }
+  // }
   .login_page{
     background-image: url(../../assets/img/background12.png);
+    //background-image:url(../../assets/img/background_xian.png);
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }

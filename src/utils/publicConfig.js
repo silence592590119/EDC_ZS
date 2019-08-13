@@ -18,22 +18,25 @@ export const loadFollowData = (_EleData,displayMode,id) => {
             if (attrId == item.ElementId && id == item.CheckItemId) {
                 var obj_f = item.FollowData;
                 if (item.UIType == '4') {
-                    $item.find("input[type='radio']").removeAttr("checked");
-                    $item.find("input[data-code='" + obj_f.Content + "']").prop("checked", "checked");
-                    $item.find("input[data-code='" + obj_f.Content + "']").data("waschecked", true);
+                   //if (mUtils.isEmpty(obj_f["Content"])) return false;
+                  $item.find("input[type='radio']").removeAttr("checked");
+                  $item.find("input[data-code='" + obj_f.Content + "']").prop("checked", "checked");
+                  $item.find("input[data-code='" + obj_f.Content + "']").data("waschecked", true);
                 }
                 else if (item.UIType == '5') {
-                    $item.find("input[type='checkbox']").removeAttr("checked");
-                    if (mUtils.isEmpty(obj_f["Content"])) return false;
-                    var arr = obj_f["Content"].split(',');
-                    $.each(arr, function (i, o) {
-                        $item.find("input[data-code='" + o + "']").prop("checked", "checked");
-                    });
+                  $item.find("input[type='checkbox']").removeAttr("checked");
+                  if (mUtils.isEmpty(obj_f["Content"])) return false;
+                  var arr = obj_f["Content"].split(',');
+                  $.each(arr, function (i, o) {
+                    $item.find("input[data-code='" + o + "']").prop("checked", "checked");
+                  });
                 }
                 else{
-                if(/3/.test(item.UIType)){
-                    if(!mUtils.isEmpty(obj_f.Content)) mUtils.setFormVal($item, obj_f["Content"])[itemType]();
-                }else mUtils.setFormVal($item, obj_f["Content"])[itemType]();
+                  //if(/3/.test(item.UIType)){
+                   // if(!mUtils.isEmpty(obj_f.Content)) mUtils.setFormVal($item, obj_f["Content"])[itemType]();
+                  //}else{
+                     mUtils.setFormVal($item, obj_f["Content"])[itemType]();
+                  //} 
                 } 
             }
         });
@@ -131,8 +134,15 @@ export const loadLogicalCheck = (_EleData,isType) => {
                                     required = $($item.find('div')).attr("rulerequired");
                                     $($item.find('div')).attr("logcRequired",'1');
                                 }else{
-                                    required = $($item.children()).attr("rulerequired");
-                                    $($item.children()).attr("logcRequired",'1');
+                                    if(isType ==1){
+                                      required = $($item.children()).attr("rulerequired");
+                                      $($item.children()).attr("logcRequired",'1');
+                                    }
+                                    if(isType == 2){
+                                      required = $($item.children().children()).attr("rulerequired");
+                                      $($item.children().children()).attr("logcRequired",'1');
+                                    }
+                                    
                                 }
                                 if(required != 1){
                                     let preHtml = null;
@@ -189,6 +199,7 @@ export const logicalCommon = (objData,isType,status) => {
               }
             }else {
               var $node = $item.children();
+              if(isType == 2) $node = $item.children().children();
               if($($node).val() == pItem.OperatorValue){
                 state = true;
               }
@@ -205,13 +216,26 @@ export const logicalCommon = (objData,isType,status) => {
                 $item.parent().show();
                 if(isType == 2) $item.parent().prev().show();
                 $item.find('input,select').removeAttr("disabled");
+                if(isType == 2){
+                  var $last = $item.children().last();
+                  if ($last.hasClass("dataTips")) {
+                    $last.remove();
+                  }
+                }
                 let required="";
                 if(/4|5/.test(type)){
                     required = $($item.find('div')).attr('rulerequired');
                     $($item.find('div')).removeAttr("logcRequired");
                 }else{
+                  if(isType ==1){
                     required = $($item.children()).attr("rulerequired");
                     $($item.children()).removeAttr("logcRequired",'1');
+                  }
+                  if(isType == 2){
+                    required = $($item.children().children()).attr("rulerequired");
+                    $($item.children().children()).removeAttr("logcRequired",'1');
+
+                  }
                 }
                 if(required != 1){
                     let preHtml = null;
@@ -245,7 +269,7 @@ export const logicalCommon = (objData,isType,status) => {
                 $item.parent().hide();
                 if(isType == 2) $item.parent().prev().hide();
                 if(/4|5/.test(type)) $item.find("input").filter((i,o)=>o.checked).attr("checked",false);
-                else $item.find("input").val("");
+                else $item.find("input,select").val("");
               }else if(pItem.OperatorResult == 102){
                 $item.find('input,select').attr("disabled","disabled");
                 $item.find('input,select').val("");
@@ -255,8 +279,14 @@ export const logicalCommon = (objData,isType,status) => {
                   required = $($item.find('div')).attr("rulerequired");
                   $($item.find('div')).attr("logcRequired",'1');
                 }else{
-                  required = $($item.children()).attr("rulerequired");
-                  $($item.children()).attr("logcRequired",'1');
+                  if(isType ==1){
+                    required = $($item.children()).attr("rulerequired");
+                    $($item.children()).attr("logcRequired",'1');
+                  }
+                  if(isType == 2){
+                    required = $($item.children().children()).attr("rulerequired");
+                    $($item.children().children()).attr("logcRequired",'1');
+                  }
                 }
                 if(required != 1){
                     let preHtml = null;
