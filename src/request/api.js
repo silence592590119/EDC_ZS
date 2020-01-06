@@ -10,5 +10,7 @@ export default {
     followlist:'/Follow/GetCollectFollowList',//随访记录列表
     segmentlist:'/Follow/GetPatientCheckItemData',//获取段落列表
     followData:'/Follow/GetCheckItemFollowData',
-    savefollow:'/Follow/SaveCollectFormData'
+    savefollow:'/Follow/SaveCollectFormData',
+    getDock:'/CheckItem/GetDictSysLevelList',//获取对接系统检查项
+    getAiReport:'/Follow/GetAiReport',//获取AI报告数据
 }

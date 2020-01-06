@@ -75,6 +75,10 @@
               clickHandlerBack(){
                 let _this = this,result=[];
                 _this.segNum =  mUtils.getStore('segNum');
+                if(mUtils.isEmpty(_this.segNum)){
+                    _this.$router.push('/patient');
+                    return false;
+                };
                 result=_this.segNum.split("-");   
                 if(result[0] == 0 && result[1] == 0 && result[2] > 0){
                     _this.$router.push('/patient');

@@ -30,13 +30,26 @@ export const loadFollowData = (_EleData,displayMode,id) => {
                   $.each(arr, function (i, o) {
                     $item.find("input[data-code='" + o + "']").prop("checked", "checked");
                   });
+                }else if(item.UIType == '11'){
+                  if(!mUtils.isEmpty(obj_f.Content)){
+                    var list = obj_f.Content.split(','),_list=[];
+                    for(let i=0;i<list.length;i++){
+                      let param ={};
+                      param.path=list[i];
+                      if(item.ImageEye !="" && item.ImageEye!= 'TE001' ){
+                        param.eye = item.ImageEyeName;
+                      }else  param.eye ='';
+                      param.checkitemID = item.CheckItemId;
+                      _list.push(param);
+                    }
+                    mUtils.cm_html(_list,segmentId,$item);
+                    $.each(list, function (i, o) {
+                      $item.find("input[data-code='" + o + "']").prop("checked", "checked").attr("disabled","disabled");
+                    });
+                  }
                 }
                 else{
-                  //if(/3/.test(item.UIType)){
-                   // if(!mUtils.isEmpty(obj_f.Content)) mUtils.setFormVal($item, obj_f["Content"])[itemType]();
-                  //}else{
-                     mUtils.setFormVal($item, obj_f["Content"])[itemType]();
-                  //} 
+                  mUtils.setFormVal($item, obj_f["Content"])[itemType]();
                 } 
             }
         });
@@ -49,11 +62,11 @@ export const isHiddenButton = (status) => {
     if(status == 2){
         $(".followList .getVal").attr("disabled",'disabled');
         $(".followList .getVal").find("input,select").attr("disabled",'disabled')
-        $(".btn_list").hide();
+        $(".btn_list,.dock_system").hide();
     }else{
         $(".followList .getVal").removeAttr("disabled");
         $(".followList .getVal").find("input,select").removeAttr("disabled");
-        $(".btn_list").show();
+        $(".btn_list,.dock_system").show();
     }
 }
 /**
@@ -312,22 +325,59 @@ export const logicalCommon = (objData,isType,status) => {
  * 根据段落类型参数  返回展示问卷和表单模式 页面
  */
 export const getConfigHtml = (jsonData,isType) => {
-  let  html = "";
+  let  html = "",dockFlag="",dockName="",EyeCode="";
+  var ateType = "'yyyy-MM-dd'";
   $.each(jsonData, function(index, item) {
    // html += "<div class='divider'></div>"
     if(isType == 1) html += ' <div class="followList titleList"><div class="title_detail">';
     else  html += ' <div class="followList questionList"><div class="question_detail">';
+    //同步按钮显示
+    if(item.InterfaceSystemCode != '' && item.InterfaceSystemCode !=1){
+      html+='<div class="dock_system" data-Id="'+item.Id+'" data-Code="'+item.InterfaceSystemCode+'">'
+      if(item.InterfaceSystemCode !=5){
+        html+='<input type="text" class="getVal j-datePicker Wdate" onclick="WdatePicker({dateFmt:' +
+        ateType +'})" onfocus="this.blur()"/>'
+        html+='<span>至</span>'
+        html+='<input type="text" class="getVal j-datePicker Wdate" onclick="WdatePicker({dateFmt:' +
+        ateType +'})" onfocus="this.blur()"/>'
+      }
+      if(item.InterfaceSystemCode == 2) dockFlag = true;
+      else dockFlag = false;
+      html += '<select disabled="'+dockFlag+'" class="getDock" data-name="dock">';
+      html += '<option value="">请选择</option>';
+      $.each(item.itemAry,function(dIndex,itemDck){
+        var eleCode = itemDck.Code,eleName = itemDck.Name;
+        if(item.DictCode == eleCode){
+          html+="<option value='"+eleCode+"' selected='' data-name='"+eleName+"'>"+eleName+"</option>"
+        }else{
+          html+="<option value='"+eleCode+"' data-name='"+eleName+"'>"+eleName+"</option>"
+        }
+      });
+      html+="</select>"
+      if(item.InterfaceSystemCode == 5) dockName = item.JianYanName;
+      else dockName = item.InterfaceSystemName;
+      html+="<button data-Id='"+item.Id+"' class='dockHandle'>"+dockName+"同步</button></div>"
+    }
+    //同步按钮显示end
+
     html += '<table class="table_detail">';
     $.each(item.Children, function(pIndex, pItem) {
       let type = pItem.UIType,required = pItem.IsRequired, value = pItem.DefaultValue,
-          dictFormName = pItem.DictFormName,minData = pItem.BeginDate,maxData = pItem.EndDate;
+          dictFormName = pItem.DictFormName,minData = pItem.BeginDate,maxData = pItem.EndDate,
+          checkDetailDictCode = pItem.CheckDetailDictCode
       html += "<tr>";
       if(isType == 1){
         html += "<td>";
         if (required == "1") {
             html += "<i>*</i>";
         }
-        html += "<span>" + pItem.ElementName + "</span></br>";
+        if(pItem.ImageEye !="" ){
+          if(pItem.ImageEye !='TE001'){
+            html += "<span>" + pItem.ElementName+'——'+pItem.ImageEyeName + "</span></br>";
+          }else{
+            html += "<span>" + pItem.ElementName + "</span></br>";
+          }
+        }else html += "<span>" + pItem.ElementName + "</span></br>";
         if (pItem.Remark) {
             html += '<span class="ElemRemark">【' + pItem.Remark + "】</span>";
         }
@@ -347,8 +397,10 @@ export const getConfigHtml = (jsonData,isType) => {
         html += "</tr>";
         html += "<tr>";
       }
+      if(type == 11) EyeCode = pItem.ImageEye
+      else EyeCode = pItem.Eye
       html +=
-        '<td class="getTd" elementID="' +
+        '<td class="getTd" EyeCode="'+EyeCode+'" checkDetailDictCode="'+checkDetailDictCode+'" elementID="' +
         pItem.ElementId +
         '" segmentID="' +
         pItem.CheckItemId +
@@ -533,6 +585,11 @@ export const getConfigHtml = (jsonData,isType) => {
           '})" onfocus="this.blur()"/>';
         if(isType == 2) html += "</div>"
       }
+      //图片控件
+      if(type == '11'){
+        html +='<div class="FileImgBox getVal" type="get_img" ruleRequired="' +required +'" >'
+        html += '<ul class="fileBoxYanUl" id="fileImgBox" name="ul"></ul>'
+      }
       html += "</td>";
       html += "</tr>";
     });
@@ -540,4 +597,13 @@ export const getConfigHtml = (jsonData,isType) => {
     html += "</div></div>";
   });
   return html;
+}
+export const _$dock=(data,_$val,_$code) =>{
+  var result = {};
+  $.each(data,function(index,item){
+    if(_$val == item.Code){
+      result = item[_$code]
+    }
+  });
+  return result;
 }
