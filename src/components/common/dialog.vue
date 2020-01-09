@@ -43,8 +43,7 @@ export default {
   data() {
     return {
       showMask: false,
-      param:[],
-      aa:'1'
+      param:[]
     };
   },
   methods: {
@@ -64,7 +63,12 @@ export default {
             }
             $(".firstOne").html("").append(html1);
             $(".firstOne th").each(function(index,item){
+              if($(item).html() == 'distinguishEyes'){
+                if(json[$(item).html()] == '1') html2 += '<th>'+json[$(item).html()]+'(左眼)</th>'
+                if(json[$(item).html()] == '2') html2 += '<th>'+json[$(item).html()]+'(右眼)</th>'
+              }else{
                 html2 += '<th>'+json[$(item).html()]+'</th>'
+              } 
             })
             $(".firstTwo").html("").append(html2);
         }
@@ -161,6 +165,7 @@ export default {
 }
 .content >>> .detailList  .table-area .firstTwo th{
     line-height: 22px;
+    text-align: center;
 }
 .content >>> .detailList .table-area .firstOne th{
     padding: 10px 5px;

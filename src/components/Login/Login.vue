@@ -120,7 +120,7 @@ export default {
     }
   }
   //西安四院样式
-  //  .logo-image{
+  // .logo-image{
   //   position: relative;
   //   top: -130px;
   //   left: 0;
@@ -130,7 +130,7 @@ export default {
   // }
   .login_page{
     background-image: url(../../assets/img/background12.png);
-    //background-image:url(../../assets/img/background_xian.png);
+    // background-image:url(../../assets/img/background_xian.png);
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }

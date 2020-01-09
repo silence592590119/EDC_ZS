@@ -120,7 +120,7 @@ export default {
   },
   methods: {
     clickCancel() {
-      console.log("点击了取消");
+      //console.log("点击了取消");
     },
     clickConfirm(param) {
       let that = this;
@@ -380,7 +380,6 @@ export default {
     //保存数据
     saveFollowData(isType, Param, msg) {
       let that = this;
-      console.log(Param)
       that.postAxios(Api.default.savefollow, Param).then(res => {
         if (res.ServerCode == 200) {
           that.showMessage("success", msg);

@@ -596,16 +596,12 @@ export const cm_html = (jsonData,segId,$item) => {
         html+= '<li class="diyLoadHover">'
         html+= '<div class="viewThumb">'
         html+= '<img data-original="'+item.path+'" src="'+item.path+'"></div>'
-        html+= '<div class="diy diyName">'+item.eye+'</div>'
+        // html+= '<div class="diy diyName">'+item.eye+'</div>'
         html+= '<div class="diy diyConfig"><input type="checkbox" name="name_'+(index+1)+'" data-code="'+item.path+'" data-name=""></div>'
         html+= '</li>'
       } 
     })
     $item.find("ul.fileBoxYanUl").append(html);
-    // console.log(Viewer)
-    // var viewer = new Viewer(document.getElementsByClassName('fileBoxYanUl'), {
-    //     url: 'data-original'
-    // }); 
   }
  export const  aaa=()=>{
     var viewer = new Viewer(document.getElementsByClassName('fileBoxYanUl'), {
