@@ -17,15 +17,15 @@
             <span>真实姓名：{{list.Name}}</span>
             <span class="span">
               已提交（
-              <span>{{CompleteNum}}</span>）
+              <span>{{CompleteNum}}</span> ）
             </span>
             <span class="span">
               已保存（
-              <span>{{PreservedNum}}</span>）
+              <span>{{PreservedNum}}</span> ）
             </span>
             <span class="span">
               未完成（
-              <span>{{UnfinishedNum}}</span>）
+              <span>{{UnfinishedNum}}</span> ）
             </span>
           </div>
         </div>
@@ -52,6 +52,7 @@
   </div>
 </template>
 <script>
+import jQuery from 'jquery';
 import Viewer from 'viewerjs';
 import 'viewerjs/dist/viewer.css';
 import HeadTop from "../common/HeadTop3";
@@ -60,6 +61,7 @@ import Bus from '../../config/eventBus';
 import * as mUtils from "../../utils/mUtils";
 import * as setting from "../../utils/publicConfig";
 import * as Api from "../../request/api";
+import '../../../static/js/chosen.jquery';
 let Base64 = require("js-base64").Base64;
 export default {
   name: "",
@@ -102,20 +104,21 @@ export default {
     that.FormName = that.followdata.FormName;
     that.topTitle = that.followdata.FollowTimes == 0 ? "基线表单" : "随访表单";
     that.list = mUtils.getStore("patientinfo");
-    that.getSegmentList();
     that.getDock();
   },
   mounted() {
     //组件挂载时，执行
     var that = this;
     that.bodyHeight = document.documentElement.clientHeight;
-    that.elementDictData().then(() => {
-      let childData = that.dictionaryData;
-      if (that.semgentList.length > 0) {
-        that.getFormHtml();
-      } else {
-        that.showMessage("error", "当前表单无可用段落！");
-      }
+    that.getSegmentList().then(()=>{
+      that.elementDictData().then(() => {
+        let childData = that.dictionaryData;
+        if (that.semgentList.length > 0) {
+          that.getFormHtml();
+        } else {
+          that.showMessage("error", "当前表单无可用段落！");
+        }
+      });
     });
   },
   methods: {
@@ -195,12 +198,8 @@ export default {
         followId: this.followdata.Id,
         language: Api.default.language
       };
-      that
-        .postAxios(Api.default.segmentlist, Params)
-        .then(res => {
-          let Unfinished = [],
-            Preserved = [],
-            Complete = [];
+      let segAll = that.postAxios(Api.default.segmentlist, Params).then(res => {
+          let Unfinished = [],Preserved = [], Complete = [];
           if (res.Data.length > 0) {
             that.semgentList = res.Data;
             that.segmentId = res.Data[that.changeblue].Id;
@@ -214,19 +213,14 @@ export default {
               that.PreservedNum = Preserved.length;
               that.UnfinishedNum = Unfinished.length;
             });
-            that.segNum =
-              that.UnfinishedNum +
-              "-" +
-              that.PreservedNum +
-              "-" +
-              that.CompleteNum;
+            that.segNum =that.UnfinishedNum + "-" + that.PreservedNum + "-" + that.CompleteNum;
             mUtils.setStore("segNum", that.segNum);
             setting.isHiddenButton(that.status);
           }
-        })
-        .catch(err => {
+        }).catch(err => {
           console.log(err);
         });
+      return segAll;
     },
     //保存
     saveHandle() {
@@ -243,113 +237,15 @@ export default {
       let that = this;
       let _eleData = JSON.parse(JSON.stringify(this.params));
       let CheckElementData = _eleData.ItemList,
-        Param = {
-          followId: that.followdata.Id,
-          checkItemId: that.segmentId,
-          programId: mUtils.getStore("programid"),
-          language: Api.default.language
-        };
-      let arrData = [],
-        requireArr = [],
-        radioArr = [],
-        dateArr = [],
-        content = "";
-      $(".getVal").each(function(index, item) {
-        var $item = $(item),
-          attrReq = $item.attr("rulerequired"),
-          itemType,
-          attrLogic = $item.attr("logcRequired");
-        var $itemParent, attrId, segmentId, attrType, attrDic;
-        itemType = item.type == undefined ? $(item).attr("type") : item.type;
-        if (that.displayMode == 1) {
-          $itemParent = $item.parent();
-        } else {
-          if (itemType == "get_checkbox" || itemType == "get_radio")
-            $itemParent = $item.parent();
-          else $itemParent = $item.parent().parent();
-        }
-        attrId = $itemParent.attr("elementid");
-        segmentId = $itemParent.attr("segmentid");
-        attrType = $itemParent.attr("uitype");
-        attrDic = $itemParent.attr("dictformname");
-        $.each(CheckElementData, function(pIndex, pItem) {
-          $.each(pItem.Children, function(index, item) {
-            if (
-              attrId == item.ElementId &&
-              that.segmentId == item.CheckItemId
-            ) {
-              var obj_f = item.FollowData;
-              obj_f.CheckItemId = item.CheckItemId;
-              obj_f.ElementId = item.ElementId;
-              obj_f.UIType = attrType;
-              if (!mUtils.isEmpty(attrDic)) obj_f.ParentDictCode = attrDic;
-              obj_f.Value = $item.find("option:selected").text();
-              if (item.UIType == "4") {
-                let parent = $item.parent().parent();
-                if ($(parent).css("display") != "none") {
-                  obj_f.Content =
-                    $item
-                      .find("input[type=radio]")
-                      .filter((i, o) => o.checked)
-                      .attr("data-code") || "";
-                  obj_f.Value =
-                    $item
-                      .find("input[type=radio]")
-                      .filter((i, o) => o.checked)
-                      .attr("data-name") || "";
-                } else {
-                  obj_f.Content = "";
-                  obj_f.Value = "";
-                }
-              } else if (item.UIType == "5" || item.UIType == "11") {
-                obj_f.Content = "";
-                obj_f.Value = "";
-                let parent = $item.parent().parent();
-                if ($(parent).css("display") != "none") {
-                  $item.find("input[type=checkbox]").each(function(i, o) {
-                    if (o.checked) {
-                      obj_f.Content += $(this).data("code") + ",";
-                      obj_f.Value += $(this).data("name") + ",";
-                    }
-                  });
-                }
-                if (!mUtils.isEmpty(obj_f.Content)) {
-                  obj_f.Content = obj_f.Content.substring(0,obj_f.Content.length - 1);
-                }
-                if (!mUtils.isEmpty(obj_f.Value)) {
-                  obj_f.Value = obj_f.Value.substring(0,obj_f.Value.length - 1);
-                }
-                if(item.UIType == "11") obj_f.Value ="";
-              } else {
-                let parent = null;
-                parent =that.displayMode == 1? $item.parent().parent(): $item.parent().parent().parent();
-                if ($(parent).css("display") != "none") {
-                  obj_f.Content = mUtils.getFormVal($item)[itemType]();
-                } else {
-                  obj_f.Content = "";
-                  obj_f.Value = "";
-                }
-              }
-              arrData.push(obj_f);
-              if (item.UIType != "4" && item.UIType != "5" && item.UIType != "11") {
-                if (that.displayMode == 1){
-                   if ($item.parent().parent().css("display") != "none")
-                    requireArr.push($item);
-                }
-                if (that.displayMode == 2){
-                  if ($item.parent().parent().parent().css("display") != "none")
-                    requireArr.push($item);
-                } 
-              } else {
-                if (attrReq == "1" || attrLogic == 1) {
-                  if ($item.parent().parent().css("display") != "none")
-                    radioArr.push($item);
-                }
-              }
-            }
-          });
-        });
-      });
+      Param = {
+        followId: that.followdata.Id,
+        checkItemId: that.segmentId,
+        programId: mUtils.getStore("programid"),
+        language: Api.default.language
+      };
+      let arrData = [],requireArr = [],radioArr = [],dateArr = [],content = "";
+      let obj = setting._$getEleData(that.displayMode,that.segmentId,CheckElementData);
+      arrData = obj.arrData;requireArr = obj.requireArr;radioArr = obj.radioArr;
       Param.isSubmit = isType == true ? "2" : "1";
       Param.followDetList = arrData;
       //调用服务接口
@@ -359,21 +255,13 @@ export default {
       mUtils.requiredCheck(requireArr, that.displayMode);
       mUtils.onlyRadioCheckBox(radioArr, isType, that.displayMode); //必填项校验
       if (isType) {
-        if (
-          mUtils.requiredCheck(requireArr, that.displayMode) &&
-          mUtils.onlyRadioCheckBox(radioArr, isType, that.displayMode)
-        ) {
+        if (mUtils.requiredCheck(requireArr, that.displayMode) && mUtils.onlyRadioCheckBox(radioArr, isType, that.displayMode)) {
           that.saveFollowData(isType, Param, msg);
         } else {
-          that.showMessage(
-            "error",
-            "有未通过检验的数据，请核对并修改数据后提交"
-          );
+          that.showMessage("error","有未通过检验的数据，请核对并修改数据后提交");
           return;
         }
       } else {
-        //mUtils.requiredCheck(requireArr,that.displayMode);
-        //mUtils.onlyRadioCheckBox(radioArr,isType,that.displayMode);//必填项校验
         that.saveFollowData(isType, Param, msg);
       }
     },
@@ -399,9 +287,7 @@ export default {
         language: "CN",
         programId: mUtils.getStore("programid")
       };
-      that
-        .postAxios(Api.default.followData, Params)
-        .then(res => {
+      that.postAxios(Api.default.followData, Params).then(res => {
           that.params = res.Data;
           let list = JSON.parse(JSON.stringify(res.Data.ItemList));
           $.each(list, (pIndex, pItem) => {
@@ -439,32 +325,25 @@ export default {
               if (/7|8|9/.test(type)) {
                 if (item.DefaultType == 1) {
                   var time = mUtils.formatDate(new Date());
-                  item.DefaultValue =
-                    type == "7"
-                      ? mUtils.formatJsonData(time)
-                      : type == "8"
-                      ? mUtils.formatHourMinute(time)
-                      : time;
+                  item.DefaultValue =type == "7"? mUtils.formatJsonData(time): type == "8"? mUtils.formatHourMinute(time): time;
                 }
               }
             });
           });
           $(".followContent").html("");
-          $(".followContent").append(
-            setting.getConfigHtml(list, that.displayMode)
-          );
+          $(".followContent").append(setting.getConfigHtml(list, that.displayMode));
           that.loadData(JSON.parse(JSON.stringify(that.params)));
-        })
-        .catch(err => {
+        }).catch(err => {
           console.log(err);
         });
     },
     //加载数据
     loadData(objData) {
       let _EleData = objData.ItemList[0].Children,that = this;
+      setting.initCheckBox(that.displayMode);
       setting.isHiddenButton(that.status);
       setting.loadFollowData(_EleData, that.displayMode, that.segmentId); //加载数据
-      setting.loadLogicalCheck(_EleData, that.displayMode); //加载逻辑控件配置
+      setting.loadLogical(_EleData, that.displayMode,false); //加载逻辑控件配置
       if(objData.ItemList[0].InterfaceSystemCode != 1 && !mUtils.isEmpty(objData.ItemList[0].InterfaceSystemCode)){
         const ViewerDom = document.getElementById('fileImgBox');
         const viewer = new Viewer(ViewerDom, {url:'data-original'});
@@ -487,17 +366,30 @@ export default {
             let $parent = $(this).parent().parent().parent(),logControl = [],logControlDetails = [];
             var status = $(this).data("waschecked");
             if(!mUtils.isEmpty($parent.attr("logcontroldetails"))){
+              logControl= JSON.parse(Base64.decode($parent.attr("logControl")));
               logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
-              setting.logicalCommon(logControlDetails, that.displayMode, status);
+              setting.logicalConfig(logControl,logControlDetails,that.displayMode);
             }
           });
         //下拉框逻辑校验
         $("select.getVal").change(function() {
           var $parent = $(this).parent(),logControl = [],logControlDetails = [];
           if (that.displayMode == 2) $parent = $(this).parent().parent();
+          if(mUtils.isEmpty($parent.attr("logcontroldetails"))) return false;
+          logControl= JSON.parse(Base64.decode($parent.attr("logControl")));
           logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
-          setting.logicalCommon(logControlDetails, that.displayMode, "");
+          setting.logicalConfig(logControl,logControlDetails,that.displayMode);
         });
+        $("input.getVal").blur(function(){
+          var $parent = $(this).parent(),logControl = [],logControlDetails = [];
+          if (that.displayMode == 2) $parent = $(this).parent().parent();
+          if($parent.attr("uiType") == '6'){
+            logControl= JSON.parse(Base64.decode($parent.attr("logControl")));
+            logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));
+            setting.logicalConfig(logControl,logControlDetails,that.displayMode);
+          }
+        });
+        //点击同步
         $(".dockHandle").on("click", function() {
           let Param = {
             followId: that.followdata.Id,
@@ -515,6 +407,24 @@ export default {
             console.log(err)
           });
         });
+        //点击计算
+         $(".CalculateBtn").on("click", function() {
+            let segID = $(this).attr("data-Id"),eleID = $(this).attr("data-eleID"),followDetList = setting._$getEleData(that.displayMode,that.segmentId,objData.ItemList).arrData;
+            let Param = {
+              followDetList:followDetList,
+              checkItemId:segID,
+              elementId:eleID,
+              programId: mUtils.getStore("programid"),
+              language: Api.default.language
+            };
+            that.postAxios(Api.default.count,Param).then(res => {
+              if(res.ServerCode == '200' ){
+                  $(this).parents("td").find("input").val(res.Data)
+              }
+            }).catch(err=>{
+              console.log(err)
+            });
+         })
       });
     },
     //获取字典数据、元素表单中字典数据(自定义字典中所有操作的数据都需要重新获取最新数据)

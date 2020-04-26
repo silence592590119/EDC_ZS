@@ -226,6 +226,12 @@
     border-radius: 2px;
     background-color: #fff;
   }
+  .followContent >>> .followList table.table_detail tr.ElementShow{
+    display: table-row;
+  }
+  .followContent >>> .followList table.table_detail tr.ElementHide{
+    display: none;
+  }
   /*同步*/
   .followContent >>> .followList .dock_system{
     text-align: right;
@@ -238,10 +244,12 @@
     margin: 0 6px;
     width: 70px;
   }
-  .followContent >>> .followList .dock_system button.dockHandle{
+  .followContent >>> .followList .dock_system button.dockHandle,
+  .followContent >>> .followList  button.CalculateBtn{
     display: inline-block;
     height: 30px;
-    width: 90px;
+    /* width: 90px; */
+    padding: 0px 6px;
     line-height: 30px;
     border-radius: 3px;
     white-space: nowrap;
@@ -260,6 +268,17 @@
     font-weight: 500;
     -ms-user-select: none;
     font-size: 16px;
+  }
+  .followContent >>> .followList  button.CalculateBtn{
+    margin-left: 12px;
+    height: 26px;
+    line-height: 26px;
+    padding: 0 12px;
+  }
+  .followContent >>> .followList .CalculateName{
+    font-size: 13px;
+    color: red;
+    line-height: 26px;
   }
   /*end*/
   .btn_list .el-button{

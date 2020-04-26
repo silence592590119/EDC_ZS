@@ -9,7 +9,7 @@ import { Loading,MessageBox } from 'element-ui';
 let baseURL = Config.default.baseURL; //测试版
 //let baseURL = Config.default.productURL; //中山正式版
 //let baseURL = Config.default.xianURL; //西安四院正式版
-//let baseURL = Config.default.gongURL; // ..正式版 
+//let baseURL = Config.default.gongURL; // 宫瘤宁正式版 
 let loadingInstance;
 // 添加请求拦截器，在发送请求之前做些什么(**具体查看axios文档**)
 axios.interceptors.request.use(function (config) {

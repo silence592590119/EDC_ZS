@@ -15,7 +15,9 @@
                 <div class='welcome'>
                     <p class='name avatarname'>{{username}}</p>
                 </div>
-                <i class="fa fa-sign-out logout" @click='logout'></i>
+                <i class="fa fa-sign-out logout" @click='logout'>
+                    <img src="../../assets/img/logout.png" />
+                </i>
             </el-col>
         </el-row>
     </header>
@@ -101,4 +103,10 @@
 </script>
 
 <style scoped lang='less'>
+    .logout{
+        img{
+            height: 20px;
+            margin-top: -3px;
+        }
+    }
 </style>

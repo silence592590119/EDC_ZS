@@ -5,6 +5,7 @@
             <div class="logo-image">
               <img src="../../assets/img/logo.png" />
               <!-- <img src="../../assets/img/logo_xian.png" /> -->
+              <!-- <img src="../../assets/img/logo_gong.png" /> -->
             </div>
             <section class="form_contianer">
               <div class="manage_tip">
@@ -12,11 +13,17 @@
               </div>
               <el-form :model="loginForm" :rules="ruleInline" ref="loginForm" class="loginForm">
               <el-form-item prop="username">
-                <span class="fa-tips"><i class="fa fa-user"></i></span>
+                <span class="fa-tips">
+                  <!-- <i class="fa fa-user"></i> -->
+                  <img src="../../assets/img/user.png" />
+                </span>
                 <el-input class="area" type="text" placeholder="用户名" v-model="loginForm.username" ></el-input>
               </el-form-item>
               <el-form-item prop="password">
-                  <span class="fa-tips"><i class="fa fa-lock"></i></span>
+                  <span class="fa-tips">
+                    <!-- <i class="fa fa-lock"></i> -->
+                    <img src="../../assets/img/password.png" />
+                  </span>
               <el-input class="area" type="password" placeholder="密码" v-model="loginForm.password"></el-input>
               </el-form-item>
               <el-form-item>
@@ -81,14 +88,14 @@ export default {
                 that.postAxios(Api.default.enterProgram,{programId:res.Data.programId,language:'CN'}).then(res=>{
                   that.$router.push('/patient'); 
                 }).catch(err=>{
-                    console.log(err);
+                  console.log(err);
                 });
               }else{
                 that.$router.push('/program');
               }
               that.showMessage('success', '登录成功');
             }).catch(err=>{
-                console.log(err);
+              console.log(err);
             })
         } else {
           that.$notify.error({
@@ -126,6 +133,15 @@ export default {
   //   left: 0;
   //   img{
   //     width: 90%;
+  //   }
+  // }
+  //宫瘤宁样式
+  // .logo-image{
+  //   position: relative;
+  //   top: -130px;
+  //   left: 0;
+  //   img{
+  //     width: 100%;
   //   }
   // }
   .login_page{
