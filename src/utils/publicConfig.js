@@ -35,15 +35,16 @@ export const loadFollowData = (_EleData,displayMode,id) => {
                       $item.find("input[data-code='" + o + "']").prop("checked", "checked");
                     });
                   }else{
-                    $("." + item.ElementId).find("option").removeAttr("selected");
+                    var ElementCheckItemId = item.CheckItemId + '_'+item.ElementId;
+                    $("." + ElementCheckItemId).find("option").removeAttr("selected");
                     if(mUtils.isEmpty(obj_f["Content"])) return true;
                     var arr = obj_f["Content"].split(',');
                     //多选下拉框
                     if (arr.length == 0) {
                         return true;
                     }else{
-                      $("." + item.ElementId).val(arr);
-                      $("." + item.ElementId).trigger("chosen:updated");
+                      $("." + ElementCheckItemId).val(arr);
+                      $("." + ElementCheckItemId).trigger("chosen:updated");
                     }
                   }
                 }else if(item.UIType == '11'){
@@ -81,7 +82,6 @@ export const isHiddenButton = (status) => {
         $(".btn_list,.dock_system,.CalculateBtn").hide();
     }else{
         $(".followList .getVal").removeAttr("disabled");
-        $(".followList .getVal").find("input,select").removeAttr("disabled");
         $(".btn_list,.dock_system,.CalculateBtn").show();
         $(".table_detail .getVal").each(function(index,item){
           if($(item).siblings().length > 0){
@@ -89,6 +89,8 @@ export const isHiddenButton = (status) => {
           }
         });
         $(".followList select.chosen-select").removeAttr("disabled");
+        $(".followList").find("input,select,textarea").removeAttr("disabled").css({"background-color":'#ffffff'});
+        $(".followList input.Wdate").removeAttr("disabled").css({"background-color":'#ffffff'});
     }
 }
 /**
@@ -480,21 +482,6 @@ export const getConfigHtml = (jsonData,isType) => {
         if(isType == 2) html += "</div>"
       }
       //下拉框
-      if (type == "3") {
-        if(isType == 2) html += "<div class='text_input'>"
-        html += '<select class="getVal" ruleRequired="' + required + '">';
-        html += '<option value="">请选择</option>';
-        $.each(pItem.itemAry,function(eIndex,itemEle){
-            var eleCode = itemEle.Code,eleName = itemEle.Name;
-            if(pItem.DefaultValue == eleCode){
-                html += '<option value="'+eleCode+'" selected="" data-name="'+eleName+'">'+eleName+'</option>'
-            }else{
-                html += '<option value="'+eleCode+'" data-name="'+eleName+'">'+eleName+'</option>'
-            }
-        });
-        html += "</select>";
-        if(isType == 2) html += "</div>"
-      }
       //单选框
       if (type == "4") {
         if(pItem.ExpressiveForm == '1'){
@@ -512,7 +499,8 @@ export const getConfigHtml = (jsonData,isType) => {
               }
           });
           html += " </div>";
-        }else{
+        }
+        else{
           if(isType == 2) html += "<div class='text_input'>"
           html += '<select class="getVal" ruleRequired="' + required + '">';
           html += '<option value="">请选择</option>';
@@ -546,7 +534,9 @@ export const getConfigHtml = (jsonData,isType) => {
           });
           html += " </div>";
         }else{
-          html +='<select class="getVal chosen-select '+pItem.ElementId+'" data-CheckBox="true" data-Checked="'+pItem.ElementId+'" data-placeholder="请选择" multiple="" ruleRequired="' +required +'">'
+          var ElementCheckItemId = pItem.CheckItemId + '_'+ pItem.ElementId;
+          if(isType == 2) html += "<div class='text_input'>"
+          html +='<select class="getVal chosen-select '+ElementCheckItemId+'" data-CheckBox="true" data-Checked="'+ElementCheckItemId+'" data-placeholder="请选择" multiple="" ruleRequired="' +required +'">'
           $.each(pItem.itemAry,function(eIndex,itemEle){
             var eleCode = itemEle.Code,eleName = itemEle.Name;
             if(pItem.DefaultValue == eleCode){
@@ -556,6 +546,7 @@ export const getConfigHtml = (jsonData,isType) => {
             }
           });
           html+='</select>'
+          if(isType == 2) html += "</div>"
         }
       }
       //数字框
@@ -744,7 +735,9 @@ export const _$getEleData=(displayMode,segID,CheckElementData)=>{
         } else {
           if (attrReq == "1" || attrLogic == 1) {
             if ($item.parent().parent().css("display") != "none")
-              radioArr.push($item);
+              if(item.ExpressiveForm == '2'){
+                requireArr.push($item);
+              }else radioArr.push($item);
           }
         }
       }
@@ -759,9 +752,13 @@ export const initCheckBox=(isType)=>{
     var $dataCheckBox = $(item).attr("data-Checked");
     $("."+$dataCheckBox).chosen("chosen:updated");
     $(".chosen-select").chosen({no_results_text:"没有找到任何数据!",width:"",display_selected_options:false});
-    if(isType == '1') $(".chosen-container").css({"width":"auto","min-width":"170px"});
+    if(isType == '1') {
+      $(".chosen-container").css({"width":"auto","min-width":"90%"});
+      $(".chosen-container-multi .chosen-choices").css({"margin-top":"0px","height":"46px","line-height": "46px"});
+      $(".chosen-container .chosen-drop").css({"top":"113%","border":'1px solid #ccc'});
+    }
     else $(".chosen-container").css({"width":"100%"});
-    $(".chosen-container li.search-field").find("input").css("width","50px");
+    $(".chosen-container li.search-field").find("input").css("width","54px");
   })
 }
 /*start 新逻辑校验 */
@@ -832,7 +829,7 @@ export const _$getLoadLogic = (UIType, data, Operator, Value) => {
     var state = "";
     if (UIType == 5) {
         var val = data.split(",");
-        if (val.contains(Value)) {
+        if (mUtils.contains(val,Value)) {
             state += Operator == 11 ? true : false;
         } else {
             state += Operator == 11 ? false : true;
@@ -901,7 +898,7 @@ export const _$getCondition = (condition) => {
                         state += pItem.Operator == 11 ? false : true;
                     }
                   } else {
-                    state += false;
+                    state += pItem.Operator == 11 ? false : true;
                   }
                 } else {
                   val = $node.val();
@@ -926,13 +923,13 @@ export const _$getCondition = (condition) => {
                 }
                 if (!mUtils.isEmpty(val)) {
                   if (ExpForm == 1) val = val.substring(0, val.length - 1).split(",");
-                  if (val.contains(pItem.OperatorValue)) {
+                  if (mUtils.contains(val,pItem.OperatorValue)) {
                       state += pItem.Operator == 11 ? true : false;
                   } else {
                       state += pItem.Operator == 11 ? false : true;
                   }
                 } else {
-                  state += false;
+                  state += pItem.Operator == 11 ? false : true;
                 }
               }
             } else {
@@ -955,9 +952,10 @@ export const _$setResult = (result,isType, isAdd) => {
       var $item = $(item), elementID = $item.attr("elementid"), segmentID = $item.attr("segmentid"), 
       type = $item.attr("uiType"), ExpForm = $item.attr("ExpForm");
       if (elementID == pItem.ElementId && segmentID == pItem.CheckItemId) {
+        let ElementCheckItemId = pItem.CheckItemId + '_' + pItem.ElementId;
         if (pItem.OperatorResult == 101 || pItem.OperatorResult == 107) {// 101隐藏与107显示
           let $type = pItem.OperatorResult== 101?true:false;
-          _$setShowHidden($type, $item, type, ExpForm, pItem.ElementId,isType);
+          _$setShowHidden($type, $item, type, ExpForm, pItem.ElementCheckItemId,isType);
         } else if (pItem.OperatorResult == 103 || pItem.OperatorResult == 108) {//103必填与108不必填
           if ($item.parent().css("display") != 'none') {
             let $type = pItem.OperatorResult== 103?true:false;
@@ -975,22 +973,22 @@ export const _$setResult = (result,isType, isAdd) => {
               $item.find("select").val(OperatorValue);
             }
           } else if (type == '5') {
-            _$setReduce(true, $item, ExpForm, OperatorValue, pItem.ElementId);
+            _$setReduce(true, $item, ExpForm, OperatorValue, ElementCheckItemId);
           } else {
             $item.find("input,textarea,select").val(OperatorValue);
           }
         }
       } else if (pItem.OperatorResult == 110 && isAdd) {//追加赋值
         if ($item.parent().css("display") != 'none') {
-          _$setAdd(type,$item, ExpForm, pItem.OperatorValue, pItem.ElementId)
+          _$setAdd(type,$item, ExpForm, pItem.OperatorValue, ElementCheckItemId)
         }
       } else if (pItem.OperatorResult == 111 && isAdd) {//追减赋值
             var OperatorValue = pItem.OperatorValue;
             if ($item.parent().css("display") != 'none') {
               if (/1|2/.test(type)) {
-                _$setTextCheckBoxtMinus(true,$item,OperatorValue,ExpForm,pItem.ElementId)
+                _$setTextCheckBoxtMinus(true,$item,OperatorValue,ExpForm,ElementCheckItemId)
               } else if (/5/.test(type)) {
-                _$setTextCheckBoxtMinus(false,$item,OperatorValue,ExpForm,pItem.ElementId)
+                _$setTextCheckBoxtMinus(false,$item,OperatorValue,ExpForm,ElementCheckItemId)
               }
             }
         }
@@ -999,7 +997,7 @@ export const _$setResult = (result,isType, isAdd) => {
   });
 }
 //实施逻辑结果时，下拉多选或复选 覆盖赋值、追加赋值公共方法
-export const _$setReduce = ($type, $item, ExpForm, OperatorValue, ElementId) => {
+export const _$setReduce = ($type, $item, ExpForm, OperatorValue, ElementCheckItemId) => {
     if (ExpForm == "1") {
         if ($type) $item.find("input[type='checkbox']").removeAttr("checked");
         if (mUtils.isEmpty(OperatorValue)) return false;
@@ -1012,7 +1010,7 @@ export const _$setReduce = ($type, $item, ExpForm, OperatorValue, ElementId) => 
         //多选下拉框
         if (arr.length == 0) { return true; }
         if ($type) {
-            $("." + ElementId).find("option").removeAttr("selected");
+            $("." + ElementCheckItemId).find("option").removeAttr("selected");
         } else {
             if (!mUtils.isEmpty($item.find("select").val())) {
                 var v_arr = $item.find("select").val().toString().split(',');
@@ -1020,8 +1018,8 @@ export const _$setReduce = ($type, $item, ExpForm, OperatorValue, ElementId) => 
                 arr =[...new Set(arr)];
             }
         }
-        $("." + ElementId).val(arr);
-        $("." + ElementId).trigger("chosen:updated");
+        $("." + ElementCheckItemId).val(arr);
+        $("." + ElementCheckItemId).trigger("chosen:updated");
     }
 }
 //根据操作符编号获取操作符
@@ -1050,7 +1048,7 @@ export const _$getOperator = (Operator, val1, val2) => {
     return state
 }
 //根据操作结果 判断元素显示隐藏
-export const _$setShowHidden = ($type, $item, type, ExpForm, ElementId,isType) => {
+export const _$setShowHidden = ($type, $item, type, ExpForm, ElementCheckItemId,isType) => {
   if ($type){
     if (/4|5/.test(type)) {
       if (ExpForm == 1) {
@@ -1058,8 +1056,8 @@ export const _$setShowHidden = ($type, $item, type, ExpForm, ElementId,isType) =
       } else {
           if (/4/.test(type)) $item.find("select").val("");
           if (/5/.test(type)) {
-              $("." + ElementId).find("option").removeAttr("selected");
-              $("." + ElementId).trigger("chosen:updated");
+              $("." + ElementCheckItemId).find("option").removeAttr("selected");
+              $("." + ElementCheckItemId).trigger("chosen:updated");
           }
       }
     } else $item.find("input,select,textarea").val("");
@@ -1115,16 +1113,16 @@ export const _$setEleRequired = ($type,type,$item,ExpForm,isType) =>{
   }
 }
 //追加赋值
-export const _$setAdd = (type,$item,ExpForm,OperatorValue,ElementId) =>{
+export const _$setAdd = (type,$item,ExpForm,OperatorValue,ElementCheckItemId) =>{
   if (/1|2/.test(type)) {
     let dot = mUtils.isEmpty($item.find("input,textarea").val()) == true ? "" : "；";
     $item.find("input,textarea").val($item.find("input,textarea").val() + dot + OperatorValue);
   } else if (/5/.test(type)) {
-    _$setReduce(false, $item, ExpForm, OperatorValue, ElementId);
+    _$setReduce(false, $item, ExpForm, OperatorValue, ElementCheckItemId);
   }
 }
 //追减赋值 -- 文本框文本域true 复选false
-export const _$setTextCheckBoxtMinus = ($type,$item,OperatorValue,ExpForm,ElementId) =>{
+export const _$setTextCheckBoxtMinus = ($type,$item,OperatorValue,ExpForm,ElementCheckItemId) =>{
   if($type){
     var str = $item.find("input,textarea").val(), str1 = "", str2 = "", str3 = "";
     if (str.lastIndexOf(OperatorValue) != -1) {
@@ -1157,15 +1155,15 @@ export const _$setTextCheckBoxtMinus = ($type,$item,OperatorValue,ExpForm,Elemen
       if (!mUtils.isEmpty($item.find("select").val())) {
           v_arr = $item.find("select").val().toString().split(',');
       }
-      $("." + ElementId).find("option").removeAttr("selected");
+      $("." + ElementCheckItemId).find("option").removeAttr("selected");
       b_arr = OperatorValue.split(',');
       //多选下拉框
       if (b_arr.length == 0) { return true; }
       let arr = v_arr.filter(items=> {
           if (!b_arr.includes(items)) return items;
       });
-      $("." + ElementId).val(arr);
-      $("." + ElementId).trigger("chosen:updated");
+      $("." + ElementCheckItemId).val(arr);
+      $("." + ElementCheckItemId).trigger("chosen:updated");
     }
   }
 }

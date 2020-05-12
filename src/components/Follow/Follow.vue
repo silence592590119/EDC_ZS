@@ -361,10 +361,14 @@ export default {
               $radio.data("waschecked", true);
             }
           });
+          // $(".chosen-choices").find("input").focus(function(){
+          //     console.log($(".followList"))
+          //     $(".followList").css({"height":"100%","width":"100%","background-color":"#ccc"})
+          // })
         //多选框、单选框逻辑校验
         $("div.getVal").find("input").on("click", function(e) {
             let $parent = $(this).parent().parent().parent(),logControl = [],logControlDetails = [];
-            var status = $(this).data("waschecked");
+            var status = $(this).data("waschecked"); 
             if(!mUtils.isEmpty($parent.attr("logcontroldetails"))){
               logControl= JSON.parse(Base64.decode($parent.attr("logControl")));
               logControlDetails = JSON.parse(Base64.decode($parent.attr("logcontroldetails")));

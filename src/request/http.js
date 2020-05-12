@@ -6,7 +6,8 @@ import * as mUtils from '../utils/mUtils'
 
 import { Loading,MessageBox } from 'element-ui';
 //测试环境和正式环境服务地址配置
-let baseURL = Config.default.baseURL; //测试版
+let baseURL = Config.default.furl;
+//let baseURL = Config.default.baseURL; //测试版
 //let baseURL = Config.default.productURL; //中山正式版外网
 //let baseURL = Config.default.productURL_N; //中山正式版内网
 //let baseURL = Config.default.xianURL; //西安四院正式版

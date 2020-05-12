@@ -287,7 +287,7 @@ export const setFormVal = ($item, val) => {
 /**
  * 错误信息操作 state当前状态 true添加/false移除 $item当前项
  */
-export const errorMsgOperate = (state,$item,ruleTitle,isType)=>{
+export const errorMsgOperate = (state,$item,ruleTitle,isType,expform,uitype)=>{
     let title;
     if(isEmpty(ruleTitle)) title = '必填项不能为空';
     else title = ruleTitle;
@@ -298,11 +298,17 @@ export const errorMsgOperate = (state,$item,ruleTitle,isType)=>{
         if(isType == 1 ) {
             $item.addClass("errorPrompt");
             $item.addClass("inputClass");
-            $item.after(span);
+            if(uitype == '5' && expform == '2'){ 
+                $item.parent().children().last().after(span);
+            }else{
+                $item.after(span);        
+            }
         }
         if(isType == 2 ){
-            $item.parent().next().remove();
-            $item.parent().after(span);
+            let $parent =$item.parent();
+            if(expform == 2) $parent = $item.parent().parent();
+            $parent.next().remove();
+            $parent.after(span);
         } 
         $("[data-toggle = 'tooltip']").tooltip();
     }else{
@@ -456,12 +462,13 @@ export const requiredCheck = (requireArr,isType) =>{
             var $item = $(item), required = $item.attr("rulerequired"),logcRequired=$item.attr("logcRequired"), rule = $item.attr("ruleReg") || "", range = $item.attr("ruleRange") || "", digit = $item.attr("ruleDigit") || "", val = $item.val(), reqState = null
             if(isType == 1) var $parent = $item.parent(),attrType = $parent.attr("uitype");
             if(isType == 2) var $parent = $item.parent().parent(),attrType = $parent.attr("uitype");
-            errorMsgOperate(false, $item,'',isType);
+            let expform = $item.parents("td.getTd").attr("expform");
+            expform == '2' && attrType == '5'?errorMsgOperate(false, $item,'',isType,'2',attrType):errorMsgOperate(false, $item,'',isType);
             if (required == '1' || logcRequired == 1) {
                 reqState = ruleObj.required(val);//返回true填写false未填写
                 state += reqState + ",";
                 if (!reqState) {
-                    errorMsgOperate(true, $item,'',isType);
+                    expform == '2' && attrType == '5'?errorMsgOperate(true, $item,'',isType,'2',attrType):errorMsgOperate(true, $item,'',isType);
                 } else {
                     if (rule) pubObj.booleanFn($item, rule, range, digit);
                     else {
@@ -563,7 +570,8 @@ export const parseIntervalPattern = (pattern) => {
 export const onlyRadioCheckBox = (radioArr,isType,isMode) => {
     var isSure = true;
     $.each(radioArr, function (index, item) {
-        var $item = $(item), $last = $item.children().last(), checked = "";
+        var $item = $(item), $last = $item.children().last(), checked = "",
+            expform = $item.parents("td.getTd").attr("expform");
         $.each($item.children().find("input"), function (i, o) {
             checked += $(this).prop("checked");
         });
@@ -576,7 +584,7 @@ export const onlyRadioCheckBox = (radioArr,isType,isMode) => {
         } else {
             isSure = false;
             if (!$last.hasClass("dataTips")) {
-                errorMsgOperate(true, $last,'',isMode);
+                errorMsgOperate(true, $last,'',isMode,expform);
                 $last.removeClass("errorPrompt");
                 $last.removeClass("inputClass");
             }

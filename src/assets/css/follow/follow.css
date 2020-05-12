@@ -64,7 +64,7 @@
     margin-bottom: 0px;
   }
   .followContent {
-    height: calc(100% - 140px);
+    height: calc(100% - 160px);
     display: inline-block;
     overflow-x: hidden;
     overflow-y: auto;
@@ -141,7 +141,7 @@
   .followContent >>> .followList textarea{
     border: 1px solid #aaa;
     /* width: 500px; */
-    width: 100%;
+    width: 95%;
     height: 100px;
     border-radius: 2px;
   }
