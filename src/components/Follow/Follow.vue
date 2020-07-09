@@ -9,42 +9,37 @@
       v-on:cancel="clickCancel()"
       @confirm="clickConfirm($event)"
     ></dialog-bar>
+    <dialogCollect 
+      :barData="barData"
+      :barCode="barCode"
+      v-model="barVal"
+      title="采集数据列表"
+      :content=this.barHtml
+      v-on:cancel="clickBarCancel()"
+      @confirm="clickBarConfirm($event)"
+    ></dialogCollect>
     <div class="detail_box">
       <div class="table_container">
         <div class="title">{{FollowNumName}} - {{FormName}}</div>
         <div class="basicInfo">
           <div class="segmentSatus">
             <span>真实姓名：{{list.Name}}</span>
-            <span class="span">
-              已提交（
-              <span>{{CompleteNum}}</span> ）
-            </span>
-            <span class="span">
-              已保存（
-              <span>{{PreservedNum}}</span> ）
-            </span>
-            <span class="span">
-              未完成（
-              <span>{{UnfinishedNum}}</span> ）
-            </span>
+            <span class="span">已提交（ <span>{{CompleteNum}}</span> ）</span>
+            <span class="span">已保存（ <span>{{PreservedNum}}</span> ）</span>
+            <span class="span">未完成（ <span>{{UnfinishedNum}}</span> ）</span>
           </div>
         </div>
         <div class="tips">
           <div class="spanlist">
-            <span
-              v-for="(list,index) in semgentList"
-              class="seach-all"
-              :class="{seachchange:changeblue==index}"
-              @click="changeColor(index,list)"
-              :key="index"
-            >{{list | markSegmentName}}</span>
+            <span v-for="(list,index) in semgentList"
+              class="seach-all" :class="{seachchange:changeblue==index}"
+              @click="changeColor(index,list)" :key="index">{{list | markSegmentName}}</span>
           </div>
         </div>
         <div class="divider"></div>
         <div class="followContent"></div>
       </div>
     </div>
-
     <div class="btn_list">
       <el-button type="primary" @click="saveHandle()">保存</el-button>
       <el-button type="success" @click="referhandle()">提交</el-button>
@@ -54,9 +49,11 @@
 <script>
 import jQuery from 'jquery';
 import Viewer from 'viewerjs';
+import datePicker from 'vue-ios-datepicker';
 import 'viewerjs/dist/viewer.css';
 import HeadTop from "../common/HeadTop3";
 import dialogBar from "../common/dialog.vue";
+import dialogCollect from "../common/dialog1.vue";
 import Bus from '../../config/eventBus';
 import * as mUtils from "../../utils/mUtils";
 import * as setting from "../../utils/publicConfig";
@@ -90,11 +87,17 @@ export default {
       sendVal: false,
       dockHtml:"",
       collectData:"",
+      barVal:false,
+      barHtml:'',
+      barData:'',
+      barCode:'',
+      laydate: window.laydate
     };
   },
   components: {
     HeadTop,
-    dialogBar
+    dialogBar,
+    dialogCollect
   },
   created() {
     //组件创建时，调用数据
@@ -113,6 +116,7 @@ export default {
     that.getSegmentList().then(()=>{
       that.elementDictData().then(() => {
         let childData = that.dictionaryData;
+        that.dictionaryData = that.dictionaryData;
         if (that.semgentList.length > 0) {
           that.getFormHtml();
         } else {
@@ -124,6 +128,9 @@ export default {
   methods: {
     clickCancel() {
       //console.log("点击了取消");
+    },
+    clickBarCancel(){
+
     },
     clickConfirm(param) {
       let that = this;
@@ -161,6 +168,11 @@ export default {
         }
       })
     },
+    clickBarConfirm(param) {
+      let that = this;
+      //console.log(that.barCode)
+      that.barCode == 4?that.dataLoad(param):that.loadLisData(param);
+    },
     initImageTools(){
       const ViewerDom = document.getElementById('fileImgBox');
       const viewer = new Viewer(ViewerDom, {url:"data-original"});
@@ -171,7 +183,10 @@ export default {
     showMessage(type, message) {
       this.$alert(message, "温馨提示", {
         confirmButtonText: "确定",
-        type: type
+        type: type,
+        callback: action => {
+          console.log(action)
+        }
       });
     },
     //获取对接系统检查项目
@@ -291,24 +306,14 @@ export default {
           that.params = res.Data;
           let list = JSON.parse(JSON.stringify(res.Data.ItemList));
           $.each(list, (pIndex, pItem) => {
-            if (
-              pItem.InterfaceSystemCode != 1 &&
-              !mUtils.isEmpty(pItem.InterfaceSystemCode)
-            ) {
-              pItem.itemAry = setting._$dock(
-                that.dockData,
-                pItem.InterfaceSystemCode,
-                "DictParentData"
-              );
+            if (pItem.InterfaceSystemCode != 1 &&!mUtils.isEmpty(pItem.InterfaceSystemCode)) {
+              pItem.itemAry = setting._$dock(that.dockData,pItem.InterfaceSystemCode,"DictParentData");
             }
             $.each(pItem.Children, (index, item) => {
               var type = item.UIType;
               if (/3|4|5/.test(type)) {
                 if (type == 5) {
-                  item.itemAry = setting.getChildData(
-                    that.dictionaryData,
-                    item.DictFormName
-                  );
+                  item.itemAry = setting.getChildData(that.dictionaryData,item.DictFormName);
                   item.validateKey = mUtils.newValidateKey(); //生成唯一标识 确保单选、复选name唯一不重复
                   $.each(item.itemAry, (eleIndex, eleItem) => {
                     mUtils.isContains(item.DefaultValue, eleItem.Code) &&
@@ -316,10 +321,7 @@ export default {
                   });
                   return true;
                 }
-                item.itemAry = setting.getChildData(
-                  that.dictionaryData,
-                  item.DictFormName
-                );
+                item.itemAry = setting.getChildData(that.dictionaryData,item.DictFormName);
                 item.validateKey = mUtils.newValidateKey();
               }
               if (/7|8|9/.test(type)) {
@@ -331,23 +333,46 @@ export default {
             });
           });
           $(".followContent").html("");
-          $(".followContent").append(setting.getConfigHtml(list, that.displayMode));
+          $(".followContent").append(setting.getConfigHtml(list, that.displayMode,that.dictionaryData.scoreData));
           that.loadData(JSON.parse(JSON.stringify(that.params)));
         }).catch(err => {
           console.log(err);
         });
     },
+    datePickerInit(_EleData){
+      let self = this;
+      _EleData.forEach((v,i) =>{
+        if(/7|8|9/.test(v.UIType)){
+        let dateType = v.UIType == 7?'date':(v.UIType == 8?'time':'datetime');
+        let dateId = 'ele-'+v.ElementId+'_'+v.CheckItemId;
+        let fontmat= v.UIType == 7?"yyyy-MM-dd":(v.UIType == 8?'HH:mm':'yyyy-MM-dd HH:mm')
+        this.laydate.render({
+          elem: "#"+dateId,
+          type: dateType,
+          format:fontmat,
+          trigger: "click"
+        });
+        // let calendar = new datePicker();
+        //   calendar.init({
+        //     'trigger': "#"+dateId, /*按钮选择器，用于触发弹出插件*/
+        //     'type': dateType,/*模式：date日期；datetime日期时间；time时间；ym年月；*/
+        //   });
+        }
+      })
+    },
     //加载数据
     loadData(objData) {
       let _EleData = objData.ItemList[0].Children,that = this;
       setting.initCheckBox(that.displayMode);
-      setting.isHiddenButton(that.status);
+      setting.isHiddenButton(that.status,that.displayMode);
       setting.loadFollowData(_EleData, that.displayMode, that.segmentId); //加载数据
       setting.loadLogical(_EleData, that.displayMode,false); //加载逻辑控件配置
-      if(objData.ItemList[0].InterfaceSystemCode != 1 && !mUtils.isEmpty(objData.ItemList[0].InterfaceSystemCode)){
+      if(/4|5/.test(objData.ItemList[0].InterfaceSystemCode)){
+     // if(objData.ItemList[0].InterfaceSystemCode != 1 && !mUtils.isEmpty(objData.ItemList[0].InterfaceSystemCode)){
         const ViewerDom = document.getElementById('fileImgBox');
         const viewer = new Viewer(ViewerDom, {url:'data-original'});
       }
+      that.datePickerInit(_EleData);
       this.$nextTick().then(() => {
         $("div.getVal").find("input[type='radio']").unbind();
         $("div.getVal").find("input[type='radio']").on("click", function() {
@@ -361,10 +386,6 @@ export default {
               $radio.data("waschecked", true);
             }
           });
-          // $(".chosen-choices").find("input").focus(function(){
-          //     console.log($(".followList"))
-          //     $(".followList").css({"height":"100%","width":"100%","background-color":"#ccc"})
-          // })
         //多选框、单选框逻辑校验
         $("div.getVal").find("input").on("click", function(e) {
             let $parent = $(this).parent().parent().parent(),logControl = [],logControlDetails = [];
@@ -395,21 +416,73 @@ export default {
         });
         //点击同步
         $(".dockHandle").on("click", function() {
+          let $code = $(this).attr("data-code");
           let Param = {
             followId: that.followdata.Id,
             checkitemID: that.segmentId,
             programId: mUtils.getStore("programid"),
             language: Api.default.language
           };
-          that.postAxios(Api.default.getAiReport, Param).then(res => {
-            if(res.ServerCode == '200' ){
-              that.sendVal = true;
-              that.collectData = JSON.stringify(res.Data);
-              that.dockHtml = that.gt_html(res.Data);
-            }
-          }).catch(err=>{
-            console.log(err)
-          });
+          if(/2|4/.test($code)){
+            Param.dateBegin =  $("input[data-name='dateBegin']").val()
+            Param.dateEnd = $("input[data-name='dateEnd']").val();
+            if(mUtils.compare(Param.dateBegin,Param.dateEnd)){
+              that.showMessage("error","开始日期大于结束日期");
+              return;
+            };
+          }
+          if($code == 5){
+            that.postAxios(Api.default.getAiReport, Param).then(res => {
+              if(res.ServerCode == '200' ){
+                if(res.Data.length == 0){
+                  that.showMessage("error","未获取到AI报告数据，请稍后同步！");
+                  return;
+                }
+                that.sendVal = true;
+                that.collectData = JSON.stringify(res.Data);
+                that.dockHtml = that.gt_html(res.Data);
+              }
+            }).catch(err=>{
+              console.log(err)
+            });
+          }else if($code == 4){
+            that.postAxios(Api.default.getCollecData,Param).then(res => {
+                if(res.ServerCode == '200' ){
+                  if(res.Data.length == 0){
+                    that.showMessage("error","未获取到采集端数据，请稍后同步！");
+                    return;
+                  }
+                  if(res.Data.length > 1){
+                    that.barVal = true;
+                    that.barCode = $code;
+                    that.barData = JSON.stringify(res.Data);
+                    that.barHtml = that.get_Colloect(res.Data,$code);
+                  }else{
+                    that.dataLoad(res.Data);
+                  }
+                }
+            }).catch(err =>{console.log(err)})
+          }else if($code == 2 ){
+            Param.patientCardCode = that.list.PatientCardCode;
+            Param.hospitalLizationCode = that.list.HospitalLizationCode;
+            Param.inspectionItems = $(".getDock").val();
+            that.postAxios(Api.default.getLisData,Param).then(res => {
+                if(res.ServerCode == '200' ){
+                  if(res.Data.length == 0){
+                    that.showMessage("error","未获取到Lis数据，请稍后同步！");
+                    return;
+                  }
+                  if(res.Data.length > 1){
+                    that.barVal = true;
+                    that.barCode = $code;
+                    that.barData = JSON.stringify(res.Data);
+                    that.barHtml = that.get_Colloect(res.Data,$code);
+                  }else{
+                    that.loadLisData(res.Data);
+                  }
+                }
+            }).catch(err =>{console.log(err)})
+          }
         });
         //点击计算
          $(".CalculateBtn").on("click", function() {
@@ -439,18 +512,23 @@ export default {
         language: Api.default.language
       };
       // 控件类型
-      let promiseControltType = this.getAxios(Api.default.getDict, params1)
-        .then(res => {
-          if (res.Data.ServerCode == 403) return false;
-          that.dictionaryData.controlType = res.Data;
-        })
-        .catch(err => {
+      let promiseControltType = this.getAxios(Api.default.getDict, params1).then(res => {
+        if (res.Data.ServerCode == 403) return false;
+        that.dictionaryData.controlType = res.Data;
+      }).catch(err => {
           console.log(err);
-        });
+      });
       let params = {
         programId: mUtils.getStore("programid"),
         language: Api.default.language
       };
+      // 分值
+      let promiseScore = this.postAxios(Api.default.getScore, params).then(res => {
+        if (res.Data.ServerCode == 403) return false;
+        that.dictionaryData.scoreData = res.Data;
+      }).catch(err => {
+        console.log(err);
+      });
       let promiseAllDict = this.getAxios(Api.default.getAllDict, params)
         .then(res => {
           if (res.ServerCode != 200) return false;
@@ -481,7 +559,7 @@ export default {
         });
       return promiseAllDict;
     },
-    //获取采集数据列表
+    //获取AI报告采集数据列表
     gt_html(jsonData){
         let mainHtml = "";
         mainHtml+='<div class="dockDetailData"><ul class="ul">';
@@ -495,6 +573,66 @@ export default {
         mainHtml += '<div class="detailList"><table class="table-area" cellpadding="0" cellspacing="0">'
         mainHtml +='<thead><tr class="firstOne"></tr><tr class="firstTwo"></tr></thead><tbody></tbody></table></div>'
         return mainHtml
+    },
+    //数据采集端列表
+    dataLoad(jsonData){
+      let that = this;
+      $(".getVal").each(function(index,item) {
+        var $item = $(item),$itemParent = $item.parent(),EyeCode = $itemParent.attr("EyeCode");
+        var _code = EyeCode == 'TE002'?'OD':(EyeCode == 'TE003'?'OS':(EyeCode == 'TE004'?'OU':''));
+        if(mUtils.isEmpty(_code)){
+            that.imageHtml(jsonData[0].Images,$item);
+            that.$nextTick().then(()=>{
+              that.initImageTools();
+            })
+        }else{
+          let newAryImage = [];
+          jsonData[0].Images.forEach((val,idx) =>{
+            if(_code == val.EyeCode){
+              newAryImage.push(val);
+            }
+          })
+          that.imageHtml(newAryImage,$item);
+          that.$nextTick().then(()=>{
+            that.initImageTools();
+          })
+        }
+      })
+    },
+    imageHtml(AryImage,$item){
+      var html = "";
+      $.each(AryImage,function(index,item){
+          html+= '<li class="diyLoadHover">'
+          html+= '<div class="viewThumb">'
+          html+= '<img data-original="'+item.FileName+'" src="'+item.FileName+'"></div>'
+          html+= '<div class="diy diyName">'+item.EyeCode+'</div>'
+          html+= '<div class="diy diyConfig"><input type="checkbox" name="name_'+(index+1)+'" data-code="'+item.FileName+'" data-name=""></div>'
+          html+= '</li>'
+      })
+      $item.find("ul.fileBoxYanUl").html("").append(html);
+    },
+    //加载Lis数据
+    loadLisData(jsonData){
+      $(".getVal").each(function(index,item) {
+        var $item = $(item),$detailCode = $item.parent().attr("checkDetailDictCode");
+        let itemType = item.type == undefined ? $item.attr('type') : item.type;
+        $.each(jsonData[0].datas,function(pIndex,pItem){
+          if(pItem.InspectionSubCode == $detailCode){
+            mUtils.setFormVal($item, pItem.value)[itemType]();
+          }
+        })
+      })
+    },
+    get_Colloect(jsonData,$code){
+      let mainHtml = "";
+      let examDate = $code == 2?'ReportDate':'ExamDate';
+      mainHtml+='<div class="dockDetailData"><ul class="ul">';
+      for(let i =0;i<jsonData.length;i++ ){
+        mainHtml += '<li><span><input type="radio" id="system_'+(i+1)+'" name="dockEyesystem" value="'+(i)+'"/></span>';
+        if(mUtils.isEmpty(jsonData[i][examDate])) mainHtml += '<label for="system_'+(i+1)+'"><span>'+(i+1)+"、"+"数据"+(i+1)+'</span></label>'
+        else mainHtml += '<label for="system_'+(i+1)+'"><span>'+(i+1)+"、"+jsonData[i][examDate]+'</span></label>';
+      }
+      return mainHtml;
     }
   },
   //自定义过滤器

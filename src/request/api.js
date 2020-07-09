@@ -14,4 +14,7 @@ export default {
     getDock:'/CheckItem/GetDictSysLevelList',//获取对接系统检查项
     getAiReport:'/Follow/GetAiReport',//获取AI报告数据
     count:'/Follow/ControlCount',//计算数据
+    getScore:'/CheckItem/GetElementScore',//字典分值数据
+    getCollecData:'/Follow/GetCollecData',//获取数据采集端数据
+    getLisData:'/Follow/GetListData',//获取LIS数据
 }

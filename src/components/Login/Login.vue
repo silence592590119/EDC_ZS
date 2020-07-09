@@ -3,9 +3,9 @@
         <transition name="form-fade" mode="in-out">
           <div class="form_contianer"> 
             <div class="logo-image">
-              <img src="../../assets/img/logo.png" />
+              <!-- <img src="../../assets/img/logo.png" /> -->
               <!-- <img src="../../assets/img/logo_xian.png" /> -->
-              <!-- <img src="../../assets/img/logo_gong.png" /> -->
+              <img src="../../assets/img/logo_gong.png" />
             </div>
             <section class="form_contianer">
               <div class="manage_tip">
@@ -118,24 +118,24 @@ export default {
 <style lang="less" scoped>
   @import '../../assets/css/common/mixin';
   //中山样式
-  .logo-image{
-    position: relative;
-    top: -132px;
-    left: -40px;
-    img{
-      width: 120%;
-    }
-  }
-  //西安四院样式
   // .logo-image{
   //   position: relative;
-  //   top: -130px;
-  //   left: 0;
+  //   top: -132px;
+  //   left: -40px;
   //   img{
-  //     width: 90%;
+  //     width: 120%;
   //   }
   // }
-  //宫瘤宁样式
+  //西安四院样式
+  .logo-image{
+    position: relative;
+    top: -130px;
+    left: 0;
+    img{
+      width: 90%;
+    }
+  }
+  // 宫瘤宁样式
   // .logo-image{
   //   position: relative;
   //   top: -130px;
@@ -145,8 +145,8 @@ export default {
   //   }
   // }
   .login_page{
-    background-image: url(../../assets/img/background12.png);
-    // background-image:url(../../assets/img/background_xian.png);
+    //background-image: url(../../assets/img/background12.png);
+     background-image:url(../../assets/img/background_xian.png);
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }

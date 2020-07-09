@@ -71,11 +71,13 @@ export const loadFollowData = (_EleData,displayMode,id) => {
             }
         });
     });
+    if($("input[data-name='dateBegin']")) $("input[data-name='dateBegin']").val(mUtils.afterDate(-6))
+    if($("input[data-name='dateEnd']")) $("input[data-name='dateEnd']").val(mUtils.getCurrentDate())
 }
 /**
  * 通过父级code获取子级数据数组
  */
-export const isHiddenButton = (status) => {
+export const isHiddenButton = (status,displayMode) => {
     if(status == 2){
         $(".followList .getVal").attr("disabled",'disabled');
         $(".followList .getVal").find("input,select").attr("disabled",'disabled')
@@ -83,13 +85,15 @@ export const isHiddenButton = (status) => {
     }else{
         $(".followList .getVal").removeAttr("disabled");
         $(".btn_list,.dock_system,.CalculateBtn").show();
-        $(".table_detail .getVal").each(function(index,item){
-          if($(item).siblings().length > 0){
-            $(item).attr("disabled",'disabled').css({"background-color":'#ebebe4'});
-          }
-        });
+        if(displayMode == 1){
+          $(".table_detail .getVal").each(function(index,item){
+            if($(item).siblings().length > 0){
+              $(item).attr("disabled",'disabled').css({"background-color":'#ebebe4'});
+            }
+          });
+        }
         $(".followList select.chosen-select").removeAttr("disabled");
-        $(".followList").find("input,select,textarea").removeAttr("disabled").css({"background-color":'#ffffff'});
+        $(".followList").find("input[type=text],select,textarea").removeAttr("disabled").css({"background-color":'#ffffff'});
         $(".followList input.Wdate").removeAttr("disabled").css({"background-color":'#ffffff'});
     }
 }
@@ -106,249 +110,9 @@ export const getChildData = (dictionaryData,parentCode) => {
     return arr;
 }
 /**
- * 根据问卷和表单模式  加载逻辑校验
- */
-export const loadLogicalCheck = (_EleData,isType) => {
-    $(".getTd").each(function(index,item){
-        var $item =$(item),logControl =$item.attr("logControl"),details =$item.attr('logControlDetails'), state=false;
-        let condition=[],result=[];
-        details = JSON.parse(Base64.decode(details));
-        if(details.length > 0){
-            $.each(details,function(index,item){
-                if(item.Type == 1) condition.push(item);
-                if(item.Type == 2) result.push(item);
-            });
-            if(condition.length == 0 && result.length > 0){
-                state = true;
-            }
-            if(condition.length > 0){
-                $.each(condition,function(pIndex,pItem){
-                    $.each(_EleData,function(index,item){
-                        if(item.ElementId == pItem.ElementId && item.CheckItemId == pItem.CheckItemId){
-                            let data = item.FollowData.Content;
-                            if(!mUtils.isEmpty(data)){
-                                if(pItem.UIType == 5){
-                                    let arr = data.split(',');
-                                    if(mUtils.contains(arr,pItem.OperatorValue)){
-                                        state = true;
-                                    }
-                                }else {
-                                    if(pItem.OperatorValue == data) state = true;
-                                }
-                            }else {
-                                let defValue = item.DefaultValue;
-                                if(defValue){
-                                    if(pItem.UIType == 5){
-                                        let arr = defValue.split(',');
-                                        if(mUtils.contains(arr,pItem.OperatorValue)){
-                                            state = true;
-                                        }
-                                    }else {
-                                        if(pItem.OperatorValue == defValue) state = true;
-                                    }
-                                }
-                            }   
-                        }
-                    });
-                });
-            }
-            if(state){
-                $.each(result,function(pIndex,pItem){
-                    $(".getTd").each(function(index,item){
-                        var $item = $(item),type=$item.attr("uiType"),elementID = $item.attr("elementid"),segmentID = $item.attr("segmentid");
-                        if(elementID == pItem.ElementId && segmentID == pItem.CheckItemId){
-                            if(pItem.OperatorResult == 101){
-                                if(isType == 1) $item.parent().hide();
-                                if(isType == 2){
-                                    $item.parent().hide();
-                                    $item.parent().prev().hide();
-                                }
-                            }else if(pItem.OperatorResult == 102){
-                                $item.find('input,select').attr("disabled","disabled");
-                            }else if(pItem.OperatorResult == 103){
-                                let required="";
-                                if(/4|5/.test(type)){
-                                    required = $($item.find('div')).attr("rulerequired");
-                                    $($item.find('div')).attr("logcRequired",'1');
-                                }else{
-                                    if(isType ==1){
-                                      required = $($item.children()).attr("rulerequired");
-                                      $($item.children()).attr("logcRequired",'1');
-                                    }
-                                    if(isType == 2){
-                                      required = $($item.children().children()).attr("rulerequired");
-                                      $($item.children().children()).attr("logcRequired",'1');
-                                    }
-                                    
-                                }
-                                if(required != 1){
-                                    let preHtml = null;
-                                    if(isType == 1) preHtml = $($($item.prev())).html();
-                                    if(isType == 2) preHtml = $($($item.parent().prev().children())).html();
-                                    if(preHtml.indexOf("i") == -1){
-                                        if(isType == 1) $($($item.prev())).html("<i>*</i>"+preHtml);
-                                        if(isType == 2){
-                                           if($($($item.parent().prev().children())).find("span").hasClass("noRequred")){
-                                                preHtml = "<span>"+$($($item.parent().prev().children())).find("span").html()+"</span>"
-                                           }
-                                           $($($item.parent().prev().children())).html("<i>*</i>"+preHtml);
-                                        } 
-                                    }
-                                }
-                            }
-                        }
-                    });
-                });
-            }
-        }
-    });
-}
-//逻辑校验公共逻辑
-export const logicalCommon = (objData,isType,status) => {
-    let condition=[],result=[],state=false;
-    $.each(objData,function(index,item){
-      if(item.Type == 1) condition.push(item);
-      if(item.Type == 2) result.push(item);
-    });
-    if(condition.length == 0 && result.length > 0){//无条件时直接执行动作
-      state = true;
-    }
-    //如果有条件时，判断条件是否成立，成立之后执行动作
-    if(condition.length > 0){
-      $.each(condition,function(pIndex,pItem){
-        $(".getTd").each(function(index,item){
-          var $item = $(item),elementId=$item.attr("elementid"),segmentID = $item.attr("segmentid"),type=$item.attr("uiType");
-          if(elementId == pItem.ElementId && segmentID == pItem.CheckItemId){
-            if(/4|5/.test(type)){
-              var $node = $item.children(),val="";
-              if(/4/.test(type)){
-                val = $node.find("input[type=radio]").filter((i,o)=>o.checked).attr("data-code");
-                if(val == pItem.OperatorValue && status) state = true;
-              }
-              if(/5/.test(type)){
-                $node.find("input[type=checkbox]").each(function(i,o){
-                  if(o.checked) val+=$(this).data("code")+',';
-                });
-                if(!mUtils.isEmpty(val)) val = val.substring(0,val.length-1).split(',');
-                if(mUtils.contains(val,pItem.OperatorValue)){
-                  state = true;
-                }
-              }
-            }else {
-              var $node = $item.children();
-              if(isType == 2) $node = $item.children().children();
-              if($($node).val() == pItem.OperatorValue){
-                state = true;
-              }
-            }
-          }
-        })
-      });
-    }
-    if(objData.length > 0){
-        $.each(result,function(pIndex,pItem){
-        $(".getTd").each(function(index,item){
-            var $item = $(item),type=$item.attr("uiType"),elementID = $item.attr("elementid"),segmentID = $item.attr("segmentid");
-            if(elementID == pItem.ElementId && segmentID == pItem.CheckItemId){
-                $item.parent().show();
-                if(isType == 2) $item.parent().prev().show();
-                $item.find('input,select').removeAttr("disabled");
-                if(isType == 2){
-                  var $last = $item.children().last();
-                  if ($last.hasClass("dataTips")) {
-                    $last.remove();
-                  }
-                }
-                let required="";
-                if(/4|5/.test(type)){
-                    required = $($item.find('div')).attr('rulerequired');
-                    $($item.find('div')).removeAttr("logcRequired");
-                }else{
-                  if(isType ==1){
-                    required = $($item.children()).attr("rulerequired");
-                    $($item.children()).removeAttr("logcRequired",'1');
-                  }
-                  if(isType == 2){
-                    required = $($item.children().children()).attr("rulerequired");
-                    $($item.children().children()).removeAttr("logcRequired",'1');
-
-                  }
-                }
-                if(required != 1){
-                    let preHtml = null;
-                    if(isType == 1) preHtml = $($($item.prev())).html();
-                    if(isType == 2) preHtml = $($($item.parent().prev().children())).html();
-                    if(preHtml.indexOf("*") > -1){
-                        if(isType == 1) $($($item.prev())).html(preHtml.replace("<i>*</i>",''));
-                        if(isType == 2){
-                            if(!$($($item.parent().prev().children())).find("span").hasClass("noRequred")){
-                                preHtml = "<i>*</i><span class='noRequred'>"+$($($item.parent().prev().children())).find("span").html()+"</span>"
-                            }
-                           $($($item.parent().prev().children())).html(preHtml.replace("<i>*</i>",''));
-                        } 
-                    }else {
-                        if(isType == 1) $($($item.prev())).html(preHtml);
-                        if(isType == 2) {
-                            $($($item.parent().prev().children())).html(preHtml);
-                        }
-                    }
-                }
-            }
-        })
-      })
-    }
-    if(state){
-      $.each(result,function(pIndex,pItem){
-        $(".getTd").each(function(index,item){
-            var $item = $(item),type=$item.attr("uiType"),elementID = $item.attr("elementid"),segmentID = $item.attr("segmentid");
-            if(elementID == pItem.ElementId && segmentID == pItem.CheckItemId){
-              if(pItem.OperatorResult == 101){
-                $item.parent().hide();
-                if(isType == 2) $item.parent().prev().hide();
-                if(/4|5/.test(type)) $item.find("input").filter((i,o)=>o.checked).attr("checked",false);
-                else $item.find("input,select").val("");
-              }else if(pItem.OperatorResult == 102){
-                $item.find('input,select').attr("disabled","disabled");
-                $item.find('input,select').val("");
-              }else if(pItem.OperatorResult == 103){
-                let required="";
-                if(/4|5/.test(type)){
-                  required = $($item.find('div')).attr("rulerequired");
-                  $($item.find('div')).attr("logcRequired",'1');
-                }else{
-                  if(isType ==1){
-                    required = $($item.children()).attr("rulerequired");
-                    $($item.children()).attr("logcRequired",'1');
-                  }
-                  if(isType == 2){
-                    required = $($item.children().children()).attr("rulerequired");
-                    $($item.children().children()).attr("logcRequired",'1');
-                  }
-                }
-                if(required != 1){
-                    let preHtml = null;
-                    if(isType == 1) preHtml = $($($item.prev())).html();
-                    if(isType == 2) preHtml = $($($item.parent().prev().children())).html();
-                    if(preHtml.indexOf("*") == -1){
-                        if(isType == 1) $($($item.prev())).html("<i>*</i>"+preHtml);
-                        if(isType == 2){
-                          if($($($item.parent().prev().children())).find("span").hasClass("noRequred")){
-                                preHtml = "<span>"+$($($item.parent().prev().children())).find("span").html()+"</span>"
-                           }
-                           $($($item.parent().prev().children())).html("<i>*</i>"+preHtml);
-                        } 
-                    }
-                }
-              }
-            }
-        })
-      })
-    }
-}
-/**
  * 根据段落类型参数  返回展示问卷和表单模式 页面
  */
-export const getConfigHtml = (jsonData,isType) => {
+export const getConfigHtml = (jsonData,isType,scoreData) => {
   let  html = "",dockFlag="",dockName="",EyeCode="",cluFlag="";
   var ateType = "'yyyy-MM-dd'";
   $.each(jsonData, function(index, item) {
@@ -359,16 +123,17 @@ export const getConfigHtml = (jsonData,isType) => {
     if(item.InterfaceSystemCode != '' && item.InterfaceSystemCode !=1){
       html+='<div class="dock_system" data-Id="'+item.Id+'" data-Code="'+item.InterfaceSystemCode+'">'
       if(item.InterfaceSystemCode !=5){
-        html+='<input type="text" class="getVal j-datePicker Wdate" onclick="WdatePicker({dateFmt:' +
+        html+='<input type="text" class="getVal j-datePicker Wdate" data-name="dateBegin" onclick="WdatePicker({dateFmt:' +
         ateType +'})" onfocus="this.blur()"/>'
         html+='<span>至</span>'
-        html+='<input type="text" class="getVal j-datePicker Wdate" onclick="WdatePicker({dateFmt:' +
+        html+='<input type="text" class="getVal j-datePicker Wdate" data-name="dateEnd" onclick="WdatePicker({dateFmt:' +
         ateType +'})" onfocus="this.blur()"/>'
       }
+      html += '<select class="getDock" data-name="dock">';
       if(item.InterfaceSystemCode == 2){
-        html += '<select class="getDock" data-name="dock">';
-      } else html += '<select disabled="disabled" class="getDock" data-name="dock">';
-      html += '<option value="">请选择</option>';
+        //html += '<option value="">请选择</option>';
+        item.itemAry = item.itemAry.filter(res=>{return res.Code === item.DictCode});
+      }
       $.each(item.itemAry,function(dIndex,itemDck){
         var eleCode = itemDck.Code,eleName = itemDck.Name;
         if(item.DictCode == eleCode){
@@ -380,10 +145,9 @@ export const getConfigHtml = (jsonData,isType) => {
       html+="</select>"
       if(item.InterfaceSystemCode == 5) dockName = item.JianYanName;
       else dockName = item.InterfaceSystemName;
-      html+="<button data-Id='"+item.Id+"' class='dockHandle'>"+dockName+"同步</button></div>"
+      html+="<button data-Id='"+item.Id+"' data-Code='"+item.InterfaceSystemCode+"' class='dockHandle'>"+dockName+"同步</button></div>"
     }
     //同步按钮显示end
-
     html += '<table class="table_detail">';
     $.each(item.Children, function(pIndex, pItem) {
       let type = pItem.UIType,required = pItem.IsRequired, value = pItem.DefaultValue,
@@ -460,34 +224,26 @@ export const getConfigHtml = (jsonData,isType) => {
             ']" />';
         } else {
           html +=
-            '<input type="text" class="getVal" value="' +
-            value +
-            '" ruleRequired="' +
-            required +
-            '" ruleReg="' +
-            pItem.ValidateReg +
-            '" />';
+            '<input type="text" class="getVal" value="' +value +'" ruleRequired="' +required +'" ruleReg="' +pItem.ValidateReg +'" />';
         }
         if(isType == 2) html += "</div>"
       }
       // 文本域
       if (type == "2") {
         if(isType == 2) html += "<div class='text_texteara'>"
-        html +=
-          ' <textarea class="getVal" ruleRequired="' +
-          required +
-          '">' +
-          value +
-          "</textarea>";
+        html +=' <textarea class="getVal" ruleRequired="' +required +'">' +value + "</textarea>";
         if(isType == 2) html += "</div>"
       }
-      //下拉框
       //单选框
       if (type == "4") {
+        pItem.itemAry = setDicNumber(pItem.itemAry,scoreData,pItem.Id,pItem.IsDisplay)
         if(pItem.ExpressiveForm == '1'){
           html +='<div class="getVal" type="get_radio" @click="handle" ruleName="'+pItem.validateKey+'" ruleRequired="' +required +'">';
           $.each(pItem.itemAry,function(rIndex,itemRle){
               var eleCode = itemRle.Code,eleName = itemRle.Name;
+              if(!mUtils.isEmpty(itemRle.Score)){
+                eleName = itemRle.Name + itemRle.Score;
+              }
               if(value == eleCode){
                   html += '<label>'
                   html += '<input type="radio" name="'+pItem.validateKey+'" data-code="'+eleCode+'" data-name="'+eleName+'" checked="" />'+eleName
@@ -499,13 +255,15 @@ export const getConfigHtml = (jsonData,isType) => {
               }
           });
           html += " </div>";
-        }
-        else{
+        }else{
           if(isType == 2) html += "<div class='text_input'>"
           html += '<select class="getVal" ruleRequired="' + required + '">';
           html += '<option value="">请选择</option>';
           $.each(pItem.itemAry,function(eIndex,itemEle){
               var eleCode = itemEle.Code,eleName = itemEle.Name;
+              if(!mUtils.isEmpty(itemEle.Score)){
+                eleName = itemEle.Name + itemEle.Score;
+              }
               if(pItem.DefaultValue == eleCode){
                   html += '<option value="'+eleCode+'" selected="" data-name="'+eleName+'">'+eleName+'</option>'
               }else{
@@ -556,7 +314,8 @@ export const getConfigHtml = (jsonData,isType) => {
           //判断有无计算按钮，输入框是否禁用
           if(pItem.IsCalculateBtn == 1){
             html += '<input type="text" class="getVal"  value="' + value + '"  ruleRequired="' + required + '" ruleReg="' + pItem.ValidateReg +'" ruleRange="[' +pItem.MinValue +"," +pItem.MaxValue +']" ruleDigit="' +pItem.DigitCount +'" />';
-            html += "<button data-type='"+type+"' data-Id='"+item.Id+"' data-eleID='"+pItem.ElementId+"' class='CalculateBtn'>计算</button>"
+            html += "<div data-type='"+type+"' data-Id='"+item.Id+"' data-eleID='"+pItem.ElementId+"' class='CalculateBtn'>计算</div>"
+            if(isType == 2) html += "</div>"
             html += '<div class="CalculateName">计算公式:'+pItem.CalculationFormulaName+'</div>'
           }else{
             html += '<input type="text" class="getVal" value="' + value + '"  ruleRequired="' + required + '" ruleReg="' + pItem.ValidateReg +'" ruleRange="[' +pItem.MinValue +"," +pItem.MaxValue +']" ruleDigit="' +pItem.DigitCount +'" />';
@@ -564,20 +323,21 @@ export const getConfigHtml = (jsonData,isType) => {
         } else {
           if(pItem.IsCalculateBtn == 1){
             html += '<input type="text" class="getVal" value="' + value + '" ruleRequired="' +required +'" ruleReg="' +pItem.ValidateReg +'" ruleRange="" ruleDigit="' +pItem.DigitCount + '" />';
-            html += "<button data-type='"+type+"' data-Id='"+item.Id+"' data-eleID='"+pItem.ElementId+"' class='CalculateBtn'>计算</button>"
+            html += "<div data-type='"+type+"' data-Id='"+item.Id+"' data-eleID='"+pItem.ElementId+"' class='CalculateBtn'>计算</div>"
+            if(isType == 2) html += "</div>"
             html += '<div class="CalculateName">计算公式:'+pItem.CalculationFormulaName+'</div>'
           }else{
             html += '<input type="text" class="getVal" value="' + value + '" ruleRequired="' + required + '" ruleReg="' + pItem.ValidateReg + '" ruleRange="" ruleDigit="' + pItem.DigitCount + '" />';
           }  
         }
-        if(isType == 2) html += "</div>"
+        
       }
       //日期框
-      if (type == "7") {
-        var dateType = "'yyyy-MM-dd'";
+      if (type == "7" || type == '8' || type == '9') {
         if(isType == 2) html += "<div class='text_input'>"
+        let dateId = 'ele-'+pItem.ElementId+'_'+pItem.CheckItemId; 
         html +=
-          ' <input type="text" class="getVal j-datePicker Wdate" value="' +
+          ' <input type="text" id="'+dateId+'" class="getVal j-datePicker Wdate" value="' +
           value +
           '" minData="' +
           minData +
@@ -585,36 +345,7 @@ export const getConfigHtml = (jsonData,isType) => {
           maxData +
           '" ruleRequired="' +
           required +
-          '" onclick="WdatePicker({dateFmt:' +
-          dateType +
-          '})" onfocus="this.blur()"/>';
-        if(isType == 2) html += "</div>"
-      }
-      //时间框
-      if (type == "8") {
-        var dateType = "'HH:mm'"
-        if(isType == 2) html += "<div class='text_input'>"
-        html +=
-          ' <input type="text" class="getVal j-datePicker Wdate" value="' +
-          value + '" minData="' +minData +'" maxData="' +maxData +'" ruleRequired="' +required +'" onclick="WdatePicker({dateFmt:' +dateType +'})" onfocus="this.blur()" />';
-        if(isType == 2) html += "</div>"
-      }
-      //日期时间框
-      if (type == "9") {
-        var dateType = "'yyyy-MM-dd HH:mm'";
-        if(isType == 2) html += "<div class='text_input'>"
-        html +=
-          ' <input type="text" class="getVal j-datePickerTime Wdate" value="' +
-          value +
-          '" minData="' +
-          minData +
-          '" maxData="' +
-          maxData +
-          '" ruleRequired="' +
-          required +
-          '" onclick="WdatePicker({dateFmt:' +
-          dateType +
-          '})" onfocus="this.blur()"/>';
+          '" onfocus="this.blur()" />';
         if(isType == 2) html += "</div>"
       }
       //图片控件
@@ -629,6 +360,28 @@ export const getConfigHtml = (jsonData,isType) => {
     html += "</div></div>";
   });
   return html;
+}
+/*字典分值处理*/
+export const setDicNumber = (data,scoreData,itemId,IsDisplay) => {
+  if(!mUtils.isEmpty(data)){
+    if(!IsDisplay){
+      $.each(data,function(index,item){
+        item.Score = '';
+      })
+    }else{
+      $.each(data,function(index,item){  
+        if(!mUtils.isEmpty(scoreData)){
+          $.each(scoreData,function(pIndex,pItem){
+            if(pItem.CheckitemElementID == itemId && item.Id == pItem.DictDetailID){
+              item.Score = '('+pItem.Score+'分)';
+            }
+          })
+        }
+      })
+    }
+  }
+  
+  return data;
 }
 export const _$dock=(data,_$val,_$code) =>{
   var result = {};
@@ -682,7 +435,7 @@ export const _$getEleData=(displayMode,segID,CheckElementData)=>{
           obj_f.Content = "";obj_f.Value = "";
           let parent = $item.parent().parent();
           if ($(parent).css("display") != "none") {
-            if(item.ExpressiveForm == '1'){
+            if((item.ExpressiveForm == '1' && item.UIType == "5") || item.UIType == "11"){
               $item.find("input[type=checkbox]").each(function(i, o) {
                 if (o.checked) {
                   obj_f.Content += $(this).data("code") + ",";
@@ -695,6 +448,7 @@ export const _$getEleData=(displayMode,segID,CheckElementData)=>{
               if (!mUtils.isEmpty(obj_f.Value)) {
                 obj_f.Value = obj_f.Value.substring(0,obj_f.Value.length - 1);
               }
+              if(item.UIType == "11") obj_f.Value ="";
             }else{
               if (!mUtils.isEmpty($item.val())) {
                 obj_f.Content = $item.val().toString();
@@ -711,7 +465,6 @@ export const _$getEleData=(displayMode,segID,CheckElementData)=>{
               }
             }
           }
-          if(item.UIType == "11") obj_f.Value ="";
         } else {
           let parent = null;
           parent = displayMode == 1? $item.parent().parent(): $item.parent().parent().parent();

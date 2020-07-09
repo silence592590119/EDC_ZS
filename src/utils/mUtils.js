@@ -24,7 +24,13 @@ export const getStore = name => {
     }
     return value;
 }
-
+export const compare = (startTime,endTime) =>{
+    let dateStart = new Date(startTime).getTime();
+    let dateEnd = new Date(endTime).getTime();
+    if(dateStart > dateEnd){
+        return true;
+    }else return false;
+}
 /**
  * 删除localStorage
  */
@@ -104,6 +110,25 @@ export const formatJsonData = (date) => {
 export const formatHourMinute = (date) => {
     let regAry = date.match(/([0-9]|[0-9]|1[0-9]|2[0-3]):[0-5][0-9]/);
     return regAry == null ? "" :regAry[0];
+}
+/*获取某天之后或之前的如期 */
+export const afterDate = (num) =>{
+    let day1,day2;
+    day1 = new Date();
+    day2 = new Date(day1);
+    day2.setDate(day1.getDate() + num);
+    return day2.getFullYear() + '-' +(day2.getMonth() + 1) + '-' + day2.getDate();
+}
+/*获取当前时间*/
+export const getCurrentDate = () =>{
+    let  date, Month, day;
+    date = new Date();
+    date.setTime(date.getTime());
+    Month = date.getMonth() + 1;
+    day = date.getDate();
+    if (Month <= 9) Month = '0' + Month;
+    if (day <= 9) day = '0' + day;
+    return date.getFullYear() + '-' + Month + '-' + day;
 }
 export const contains = (arr,items)=>{
     let i = arr.length;
@@ -306,9 +331,19 @@ export const errorMsgOperate = (state,$item,ruleTitle,isType,expform,uitype)=>{
         }
         if(isType == 2 ){
             let $parent =$item.parent();
-            if(expform == 2) $parent = $item.parent().parent();
-            $parent.next().remove();
-            $parent.after(span);
+            if(expform == 2) $parent = $item.parent().parent();   
+            if(uitype == 6){
+                if($parent.parent().children('div.CalculateName')){
+                    $parent.parent().children('div.CalculateName').next().remove();
+                    $parent.parent().children('div.CalculateName').after(span);
+                }else{
+                    $parent.next().remove();
+                    $parent.after(span);
+                }
+            }else{
+                $parent.next().remove();
+                $parent.after(span);
+            }
         } 
         $("[data-toggle = 'tooltip']").tooltip();
     }else{
@@ -318,7 +353,7 @@ export const errorMsgOperate = (state,$item,ruleTitle,isType,expform,uitype)=>{
             $item.siblings(".dataTips").remove();
         } 
         if(isType == 2 ){
-            $item.parent().siblings(".dataTips").remove();
+            $item.parent().siblings(".dataTips").remove();          
         } 
     }
 }
@@ -336,46 +371,46 @@ export const requiredCheck = (requireArr,isType) =>{
                 return eval(reg).test(val);
             }
         }, pubObj = {
-            booleanFn: function ($item, rule, range, digit) {
+            booleanFn: function ($item, rule, range, digit,UIType) {
                 var val = $item.val(), ruleState;
                 if (!isEmpty(val)) {
                     ruleState = (rule == "" ? true : ruleObj["customReg"](rule, val));
                 } else {
                     ruleState = true;
                 }
-                ruleState ? errorMsgOperate(false, $item,'',isType) : errorMsgOperate(true, $item, '您输入的值不满足正则表达式',isType);
+                ruleState ? errorMsgOperate(false, $item,'',isType,'',UIType) : errorMsgOperate(true, $item, '您输入的值不满足正则表达式',isType,'',UIType);
                 state += ruleState + ",";
                 if (rule) {
                     if (ruleState && range) {
-                        pubObj.booleanInt($item, range, digit);
+                        pubObj.booleanInt($item, range, digit,UIType);
                     }
                 } else {
                     if (range) {
-                        pubObj.booleanInt($item, range, digit);
+                        pubObj.booleanInt($item, range, digit,UIType);
                     }
                 }
             },
-            booleanInt: function ($item, range, digit) {
-                var val = $item.val(), $itemParent = $item.parent(), attrType = $itemParent.attr("uitype"), ruleState, content = "";
+            booleanInt: function ($item, range, digit,UIType) {
+                var val = $item.val(), ruleState, content = "";
                 if (!isEmpty(val)) {
-                    ruleState = attrType == '1' ? intervalValidation(val.length, range) : intervalValidation(val, range);
-                    content = attrType == '1' ? '您输入文本长度区间不满足' + range : '您输入值的区间不满足' + range;
+                    ruleState = UIType == '1' ? intervalValidation(val.length, range) : intervalValidation(val, range);
+                    content = UIType == '1' ? '您输入文本长度区间不满足' + range : '您输入值的区间不满足' + range;
                 } else {
                     ruleState = true;
                 }
-                ruleState ? errorMsgOperate(false, $item,'',isType) :errorMsgOperate(true, $item, content,isType);
+                ruleState ? errorMsgOperate(false, $item,'',isType,'',UIType) :errorMsgOperate(true, $item, content,isType,'',UIType);
                 state += ruleState + ",";
                 if (range) {
                     if (ruleState && digit) {
-                        pubObj.booleanDigit($item, digit);
+                        pubObj.booleanDigit($item, digit,UIType);
                     }
                 } else {
                     if (digit) {
-                        pubObj.booleanDigit($item, digit);
+                        pubObj.booleanDigit($item, digit,UIType);
                     }
                 }
             },
-            booleanDigit: function ($item, digit) {
+            booleanDigit: function ($item, digit,UIType) {
                 var val = $item.val(), ruleState, content = "";
                 if (!isEmpty(val)) {
                     if (digit > 0) {
@@ -392,7 +427,7 @@ export const requiredCheck = (requireArr,isType) =>{
                     content = digit == '0' ? '输入的值只能为整数' : '输入的值小数位不能超过' + digit + '位';
                 }
                 else ruleState = true;
-                ruleState ? errorMsgOperate(false, $item,'',isType) : errorMsgOperate(true, $item, content,isType);
+                ruleState ? errorMsgOperate(false, $item,'',isType,'',UIType) : errorMsgOperate(true, $item, content,isType,'',UIType);
                 state += ruleState + ",";
             },
             booleanDateCheck:function($item){
@@ -459,43 +494,42 @@ export const requiredCheck = (requireArr,isType) =>{
         }
         $.each(requireArr, function (index, item) {
             //rulerequired是否必填自定义属性存在必填 否则不必填
-            var $item = $(item), required = $item.attr("rulerequired"),logcRequired=$item.attr("logcRequired"), rule = $item.attr("ruleReg") || "", range = $item.attr("ruleRange") || "", digit = $item.attr("ruleDigit") || "", val = $item.val(), reqState = null
-            if(isType == 1) var $parent = $item.parent(),attrType = $parent.attr("uitype");
-            if(isType == 2) var $parent = $item.parent().parent(),attrType = $parent.attr("uitype");
+            var $item = $(item), required = $item.attr("rulerequired"),logcRequired=$item.attr("logcRequired"), rule = $item.attr("ruleReg") || "", range = $item.attr("ruleRange") || "", digit = $item.attr("ruleDigit") || "", val = $item.val(), reqState = null;
+            let $parent = isType == 1?$item.parent():$item.parent().parent();
+            let attrType = $parent.attr("uitype");
             let expform = $item.parents("td.getTd").attr("expform");
-            expform == '2' && attrType == '5'?errorMsgOperate(false, $item,'',isType,'2',attrType):errorMsgOperate(false, $item,'',isType);
+            errorMsgOperate(false, $item,'',isType,expform,attrType);
             if (required == '1' || logcRequired == 1) {
                 reqState = ruleObj.required(val);//返回true填写false未填写
                 state += reqState + ",";
                 if (!reqState) {
-                    expform == '2' && attrType == '5'?errorMsgOperate(true, $item,'',isType,'2',attrType):errorMsgOperate(true, $item,'',isType);
+                    errorMsgOperate(true, $item,'',isType,expform,attrType);
                 } else {
-                    if (rule) pubObj.booleanFn($item, rule, range, digit);
+                    if (rule) pubObj.booleanFn($item, rule, range, digit,attrType);
                     else {
-                        if (range) pubObj.booleanInt($item, range, digit);
+                        if (range) pubObj.booleanInt($item, range, digit,attrType);
                     }
                     if (!rule && !range && /7|8|9/.test(attrType)) {
                         pubObj.booleanDateCheck($item);
                     }
                     if (!rule && !range && digit) {
-                        pubObj.booleanDigit($item, digit);
+                        pubObj.booleanDigit($item, digit,attrType);
                     }
                 }
             }
             else {
                 if (rule) {
-                    pubObj.booleanFn($item, rule, range, digit);
+                    pubObj.booleanFn($item, rule, range, digit,attrType);
                 } else {
                     if (range){
-                        pubObj.booleanInt($item, range, digit);
+                        pubObj.booleanInt($item, range, digit,attrType);
                     } 
                 }
                 if (!rule && !range && /7|8|9/.test(attrType)) {
-                    //onlyDateCheck($item);
                     pubObj.booleanDateCheck($item);
                 }
                 if (!rule && !range && digit) {
-                    pubObj.booleanDigit($item, digit);
+                    pubObj.booleanDigit($item, digit,attrType);
                 }
             }
         });
@@ -611,8 +645,3 @@ export const cm_html = (jsonData,segId,$item) => {
     })
     $item.find("ul.fileBoxYanUl").append(html);
   }
- export const  aaa=()=>{
-    var viewer = new Viewer(document.getElementsByClassName('fileBoxYanUl'), {
-        url: 'data-original'
-    }); 
- }

@@ -6,12 +6,13 @@ import * as mUtils from '../utils/mUtils'
 
 import { Loading,MessageBox } from 'element-ui';
 //测试环境和正式环境服务地址配置
-let baseURL = Config.default.furl;
-//let baseURL = Config.default.baseURL; //测试版
+//let baseURL = Config.default.productURL_NC;
+// let baseURL = Config.default.baseURL; //测试版
 //let baseURL = Config.default.productURL; //中山正式版外网
-//let baseURL = Config.default.productURL_N; //中山正式版内网
-//let baseURL = Config.default.xianURL; //西安四院正式版
-//let baseURL = Config.default.gongURL; // 宫瘤宁正式版 
+// let baseURL = Config.default.productURL_N; //中山正式版内网
+// let baseURL = Config.default.xianURL; //西安四院公司服务器正式版
+//let baseURL = Config.default.xianWURL;//西安四院的服务器正式版
+let baseURL = Config.default.gongURL; // 宫瘤宁正式版 
 let loadingInstance;
 // 添加请求拦截器，在发送请求之前做些什么(**具体查看axios文档**)
 axios.interceptors.request.use(function (config) {
@@ -66,6 +67,9 @@ function successState (res) {
           MessageBox.alert(res.ServerMsg, '温馨提示', {
             confirmButtonText: '确定',
             type:'error',
+            callback: action => {
+              console.log(action)
+            }
           });
       }
       return;
@@ -82,6 +86,7 @@ function showMessage(type,message){
         mUtils.removeStore("userinfo");
         mUtils.removeStore("programinfo");
         mUtils.removeStore("programid");
+        return;
       }
    });
 }
